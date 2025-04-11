@@ -1,22 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Wallet, Coins, CheckCircle2, AlertCircle } from "lucide-react"
+import { Wallet, Coins, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useWallet } from "@txnlab/use-wallet-react"
 import algosdk from "algosdk"
+import { getGameByAppId } from "@/lib/supabase"
 
 interface DepositFundsProps {
   onDeposit: (amount: number) => void
+  gameId: number
 }
 
-export function DepositFunds({ onDeposit }: DepositFundsProps) {
+export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [transactionStatus, setTransactionStatus] = useState<"idle" | "processing" | "success" | "error">("idle")
   const [txId, setTxId] = useState<string | null>(null)
+  const [gameAddress, setGameAddress] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
   const { activeAccount, transactionSigner } = useWallet()
 
@@ -25,8 +29,6 @@ export function DepositFunds({ onDeposit }: DepositFundsProps) {
   // Convert to microAlgos (1 ALGO = 1,000,000 microAlgos)
   const microAlgos = depositAmount * 1000000
 
-  // Game treasury address
-  const GAME_TREASURY_ADDRESS = "TMKUUBK53QQQ5JTFJPY5QO6DBOXT7HICKX2HZ4MIH7MRAYVJIUIO7X2XWE"
   // Set up Algorand client
   const algodClient = new algosdk.Algodv2(
     "", // No token needed for PureStake
@@ -34,11 +36,51 @@ export function DepositFunds({ onDeposit }: DepositFundsProps) {
     "",
   )
 
+  // Fetch game address from Supabase
+  useEffect(() => {
+    async function fetchGameAddress() {
+      try {
+        setIsLoading(true)
+        const game = await getGameByAppId(gameId)
+
+        if (game && game.app_address) {
+          setGameAddress(game.app_address)
+        } else {
+          toast({
+            title: "Game not found",
+            description: "Could not find the game information.",
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        console.error("Error fetching game address:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load game information.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchGameAddress()
+  }, [gameId, toast])
+
   const handleDeposit = async () => {
     if (!activeAccount || !transactionSigner) {
       toast({
         title: "Wallet not connected",
         description: "Please connect your wallet to deposit funds.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!gameAddress) {
+      toast({
+        title: "Game address not found",
+        description: "Could not find the game address for deposit.",
         variant: "destructive",
       })
       return
@@ -54,7 +96,7 @@ export function DepositFunds({ onDeposit }: DepositFundsProps) {
       // Create payment transaction
       const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         sender: activeAccount.address,
-        receiver: GAME_TREASURY_ADDRESS,
+        receiver: gameAddress,
         amount: microAlgos,
         suggestedParams,
         note: new Uint8Array(Buffer.from(`Rock Paper Scissors Game Deposit`)),
@@ -94,6 +136,24 @@ export function DepositFunds({ onDeposit }: DepositFundsProps) {
     }
   }
 
+  if (isLoading) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Loading Game Information</CardTitle>
+        </CardHeader>
+        <CardContent className="flex justify-center py-8">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          >
+            <Loader2 className="h-8 w-8 text-primary" />
+          </motion.div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -116,6 +176,13 @@ export function DepositFunds({ onDeposit }: DepositFundsProps) {
             {activeAccount ? `${activeAccount.address.slice(0, 4)}...${activeAccount.address.slice(-4)}` : "0 ALGOS"}
           </span>
         </div>
+
+        {gameAddress && (
+          <div className="bg-muted/50 p-3 rounded-lg flex flex-col gap-1">
+            <span className="text-sm font-medium">Game Address</span>
+            <span className="text-xs break-all">{gameAddress}</span>
+          </div>
+        )}
 
         {!activeAccount && (
           <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-lg text-sm flex items-center gap-2">
@@ -156,7 +223,7 @@ export function DepositFunds({ onDeposit }: DepositFundsProps) {
           onClick={handleDeposit}
           className="w-full"
           size="lg"
-          disabled={isProcessing || !activeAccount || transactionStatus === "success"}
+          disabled={isProcessing || !activeAccount || transactionStatus === "success" || !gameAddress}
         >
           {isProcessing ? (
             <>

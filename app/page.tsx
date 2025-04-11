@@ -11,6 +11,7 @@ import { useWallet } from "@txnlab/use-wallet-react"
 import { GameClient } from "@/contracts/GameClient"
 import algosdk from "algosdk"
 import { useToast } from "@/hooks/use-toast"
+import { insertGame } from "@/lib/supabase"
 
 export default function Home() {
   const router = useRouter()
@@ -51,19 +52,36 @@ export default function Home() {
 
       // Create application
       await Caller.create.createApplication({
-        player1: activeAccount.address
+        player1: activeAccount.address,
       })
 
       // Get application reference
       const { appId, appAddress } = await Caller.appClient.getAppReference()
 
+      // Convert appId to number if it's a bigint
+      const appIdNumber = typeof appId === "bigint" ? Number(appId) : appId
+
+      // Store game information in Supabase
+      const gameData = {
+        app_id: appIdNumber,
+        app_address: appAddress,
+        player1_address: activeAccount.address,
+        status: "created",
+      }
+
+      const insertedGame = await insertGame(gameData)
+
+      if (!insertedGame) {
+        throw new Error("Failed to store game information")
+      }
+
       toast({
         title: "Game created successfully!",
-        description: `Game ID: ${appId}`,
+        description: `Game ID: ${appIdNumber}`,
       })
 
       // Navigate to the game page using the appId as gameId
-      router.push(`/game/${appId}`)
+      router.push(`/game/${appIdNumber}`)
     } catch (error) {
       console.error("Error creating game:", error)
       toast({

@@ -16,11 +16,12 @@ import { useWallet } from "@txnlab/use-wallet-react"
 import { DepositFunds } from "@/components/deposit-funds"
 
 export function GameRoom({ gameId }: { gameId: string }) {
-  const [isPlayer1, setIsPlayer1] = useState<boolean | null>(null)
+  const [isPlayer1, setIsPlayer1] = useState<boolean>(false) // Default to false instead of null
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [copied, setCopied] = useState(false)
   const [hasDeposited, setHasDeposited] = useState(false)
   const [balance, setBalance] = useState(0)
+  const [isJoined, setIsJoined] = useState(false) // Track if player has joined
   const { toast } = useToast()
   const { activeAccount } = useWallet()
 
@@ -42,6 +43,8 @@ export function GameRoom({ gameId }: { gameId: string }) {
         setIsPlayer1(false)
         await joinGame(gameId, false)
       }
+
+      setIsJoined(true)
     }
 
     checkIfCreator()
@@ -92,7 +95,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
           </CardContent>
         </Card>
       ) : !hasDeposited ? (
-        <DepositFunds onDeposit={handleDeposit} />
+        <DepositFunds onDeposit={handleDeposit} gameId={Number.parseInt(gameId)} />
       ) : (
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">

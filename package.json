@@ -42,6 +42,7 @@
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@supabase/supabase-js": "^2.49.4",
     "@txnlab/use-wallet-react": "^4.0.1",
     "@walletconnect/modal": "^2.7.0",
     "@walletconnect/sign-client": "^2.19.2",
