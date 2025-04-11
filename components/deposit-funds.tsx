@@ -92,6 +92,7 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
 
       // Get suggested transaction parameters
       const suggestedParams = await algodClient.getTransactionParams().do()
+      const atc = new algosdk.AtomicTransactionComposer();
 
       // Create payment transaction
       const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
@@ -101,16 +102,32 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
         suggestedParams,
         note: new Uint8Array(Buffer.from(`Rock Paper Scissors Game Deposit`)),
       })
+      const assetTransferTxnWithSigner = {
+        txn: txn,
+        signer: transactionSigner,
+      };
+
+      atc.addMethodCall({
+        appID: Number(gameId),
+        method: new algosdk.ABIMethod({ name: "depositfunds", desc: "", args: [{ type: "pay", name: "ftransx", desc: "" }], returns: { type: "void", desc: "" } }), // your ABI method (buyNFT)
+        signer: transactionSigner,
+        methodArgs: [assetTransferTxnWithSigner], 
+        sender: activeAccount.address,
+        suggestedParams: { ...suggestedParams, fee: Number(30) },
+      });
+
+
+      const result = await atc.execute(algodClient, 4);
+      for (const mr of result.methodResults) {
+        console.log(`${mr.returnValue}`);
+        setTxId(mr.txID)
+
+      }
 
       // Sign the transaction
-      const signedTxns = await transactionSigner([txn ], [0])
-
-      // Send the transaction
-      const { txid } = await algodClient.sendRawTransaction(signedTxns).do()
-      setTxId(txid)
+      
 
       // Wait for confirmation
-      await algosdk.waitForConfirmation(algodClient, txid, 4)
 
       // Update status and notify user
       setTransactionStatus("success")
@@ -118,6 +135,12 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
         title: "Deposit successful!",
         description: `${depositAmount} ALGOS has been added to your account.`,
       })
+
+
+
+
+
+
 
       // Wait a moment before proceeding
       setTimeout(() => {
