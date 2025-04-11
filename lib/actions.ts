@@ -1,0 +1,103 @@
+"use server"
+
+import { redirect } from "next/navigation"
+
+// Generate a random numeric ID for the game
+function generateGameId(): string {
+  return Math.floor(100000000 + Math.random() * 900000000).toString()
+}
+
+// Create a new game and redirect to the game page
+export async function createGame() {
+  const gameId = generateGameId()
+  redirect(`/game/${gameId}`)
+}
+
+// Game choices
+export type Choice = "rock" | "paper" | "scissors" | null
+
+// Game state
+export type GameState = {
+  player1Choice: Choice
+  player2Choice: Choice
+  player1Connected: boolean
+  player2Connected: boolean
+  result: "player1" | "player2" | "draw" | null
+}
+
+// In-memory game state storage (would use a database in production)
+const games = new Map<string, GameState>()
+
+// Initialize a game
+export function initializeGame(gameId: string): GameState {
+  if (!games.has(gameId)) {
+    games.set(gameId, {
+      player1Choice: null,
+      player2Choice: null,
+      player1Connected: false,
+      player2Connected: false,
+      result: null,
+    })
+  }
+  return games.get(gameId)!
+}
+
+// Join a game
+export function joinGame(gameId: string, isPlayer1: boolean): GameState {
+  const game = initializeGame(gameId)
+
+  if (isPlayer1) {
+    game.player1Connected = true
+  } else {
+    game.player2Connected = true
+  }
+
+  games.set(gameId, game)
+  return game
+}
+
+// Make a choice
+export function makeChoice(gameId: string, isPlayer1: boolean, choice: Choice): GameState {
+  const game = games.get(gameId) || initializeGame(gameId)
+
+  if (isPlayer1) {
+    game.player1Choice = choice
+  } else {
+    game.player2Choice = choice
+  }
+
+  // Check if both players have made a choice
+  if (game.player1Choice && game.player2Choice) {
+    game.result = determineWinner(game.player1Choice, game.player2Choice)
+  }
+
+  games.set(gameId, game)
+  return game
+}
+
+// Determine the winner
+function determineWinner(player1Choice: Choice, player2Choice: Choice): "player1" | "player2" | "draw" {
+  if (player1Choice === player2Choice) return "draw"
+
+  if (
+    (player1Choice === "rock" && player2Choice === "scissors") ||
+    (player1Choice === "paper" && player2Choice === "rock") ||
+    (player1Choice === "scissors" && player2Choice === "paper")
+  ) {
+    return "player1"
+  }
+
+  return "player2"
+}
+
+// Reset the game
+export function resetGame(gameId: string): GameState {
+  const game = games.get(gameId) || initializeGame(gameId)
+
+  game.player1Choice = null
+  game.player2Choice = null
+  game.result = null
+
+  games.set(gameId, game)
+  return game
+}

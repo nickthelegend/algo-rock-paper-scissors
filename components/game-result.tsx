@@ -1,0 +1,103 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { type Choice, type GameState, resetGame } from "@/lib/actions"
+import { HandIcon as HandRock, HandIcon as HandPaper, Scissors, RotateCcw } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+
+type GameResultProps = {
+  result: "player1" | "player2" | "draw" | null
+  player1Choice: Choice
+  player2Choice: Choice
+  gameId: string
+  isPlayer1: boolean
+  setGameState: React.Dispatch<React.SetStateAction<GameState | null>>
+}
+
+export function GameResult({ result, player1Choice, player2Choice, gameId, isPlayer1, setGameState }: GameResultProps) {
+  const [isResetting, setIsResetting] = useState(false)
+
+  const handleReset = async () => {
+    setIsResetting(true)
+    const updatedGameState = await resetGame(gameId)
+    setGameState(updatedGameState)
+    setIsResetting(false)
+  }
+
+  const getChoiceIcon = (choice: Choice) => {
+    switch (choice) {
+      case "rock":
+        return <HandRock className="h-12 w-12" />
+      case "paper":
+        return <HandPaper className="h-12 w-12" />
+      case "scissors":
+        return <Scissors className="h-12 w-12" />
+      default:
+        return null
+    }
+  }
+
+  const getResultMessage = () => {
+    if (result === "draw") return "It's a draw!"
+
+    const youWon = (isPlayer1 && result === "player1") || (!isPlayer1 && result === "player2")
+    return youWon ? "You won!" : "You lost!"
+  }
+
+  const getResultColor = () => {
+    if (result === "draw") return "bg-yellow-500"
+
+    const youWon = (isPlayer1 && result === "player1") || (!isPlayer1 && result === "player2")
+    return youWon ? "bg-green-500" : "bg-red-500"
+  }
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="w-full space-y-6 p-4 rounded-lg border"
+      >
+        <div className="text-center">
+          <Badge className={getResultColor()}>{getResultMessage()}</Badge>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col items-center space-y-2">
+            <div className="text-sm font-medium">{isPlayer1 ? "You" : "Player 1"}</div>
+            <motion.div
+              initial={{ rotateY: 180, opacity: 0 }}
+              animate={{ rotateY: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              {getChoiceIcon(player1Choice)}
+            </motion.div>
+            <div className="text-xs capitalize">{player1Choice}</div>
+          </div>
+
+          <div className="flex flex-col items-center space-y-2">
+            <div className="text-sm font-medium">{!isPlayer1 ? "You" : "Player 2"}</div>
+            <motion.div
+              initial={{ rotateY: 180, opacity: 0 }}
+              animate={{ rotateY: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              {getChoiceIcon(player2Choice)}
+            </motion.div>
+            <div className="text-xs capitalize">{player2Choice}</div>
+          </div>
+        </div>
+
+        <Button onClick={handleReset} className="w-full" disabled={isResetting}>
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Play Again
+        </Button>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
