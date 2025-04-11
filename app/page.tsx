@@ -52,7 +52,6 @@ export default function Home() {
 
       // Create application
       await Caller.create.createApplication({
-        player1: activeAccount.address,
       })
 
       // Get application reference

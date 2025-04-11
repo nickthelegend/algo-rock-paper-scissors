@@ -20,6 +20,7 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
   const [transactionStatus, setTransactionStatus] = useState<"idle" | "processing" | "success" | "error">("idle")
   const [txId, setTxId] = useState<string | null>(null)
   const [gameAddress, setGameAddress] = useState<string | null>(null)
+  const [player1Address, setPlayer1Address] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
   const { activeAccount, transactionSigner } = useWallet()
@@ -45,6 +46,7 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
 
         if (game && game.app_address) {
           setGameAddress(game.app_address)
+          setPlayer1Address(game.player1_address)
         } else {
           toast({
             title: "Game not found",
@@ -77,10 +79,10 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
       return
     }
 
-    if (!gameAddress) {
+    if (!gameAddress || !player1Address) {
       toast({
-        title: "Game address not found",
-        description: "Could not find the game address for deposit.",
+        title: "Game information not found",
+        description: "Could not find the game information for deposit.",
         variant: "destructive",
       })
       return
@@ -92,7 +94,7 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
 
       // Get suggested transaction parameters
       const suggestedParams = await algodClient.getTransactionParams().do()
-      const atc = new algosdk.AtomicTransactionComposer();
+      const atc = new algosdk.AtomicTransactionComposer()
 
       // Create payment transaction
       const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
@@ -102,32 +104,54 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
         suggestedParams,
         note: new Uint8Array(Buffer.from(`Rock Paper Scissors Game Deposit`)),
       })
+
       const assetTransferTxnWithSigner = {
         txn: txn,
         signer: transactionSigner,
-      };
-
-      atc.addMethodCall({
-        appID: Number(gameId),
-        method: new algosdk.ABIMethod({ name: "depositfunds", desc: "", args: [{ type: "pay", name: "ftransx", desc: "" }], returns: { type: "void", desc: "" } }), // your ABI method (buyNFT)
-        signer: transactionSigner,
-        methodArgs: [assetTransferTxnWithSigner], 
-        sender: activeAccount.address,
-        suggestedParams: { ...suggestedParams, fee: Number(30) },
-      });
-
-
-      const result = await atc.execute(algodClient, 4);
-      for (const mr of result.methodResults) {
-        console.log(`${mr.returnValue}`);
-        setTxId(mr.txID)
-
       }
 
-      // Sign the transaction
-      
+      // Check if the active account is player1 or player2
+      const isPlayer1 = activeAccount.address === player1Address
 
-      // Wait for confirmation
+      // Call the appropriate method based on player identity
+      if (isPlayer1) {
+        atc.addMethodCall({
+          appID: Number(gameId),
+          method: new algosdk.ABIMethod({
+            name: "depositfundsPlayer1",
+            desc: "",
+            args: [{ type: "pay", name: "ftransx", desc: "" }],
+            returns: { type: "void", desc: "" },
+          }),
+          signer: transactionSigner,
+          methodArgs: [assetTransferTxnWithSigner],
+          sender: activeAccount.address,
+          suggestedParams: { ...suggestedParams, fee: Number(30) },
+        })
+      } else {
+        atc.addMethodCall({
+          appID: Number(gameId),
+          method: new algosdk.ABIMethod({
+            name: "depositfundsPlayer2",
+            desc: "",
+            args: [{ type: "pay", name: "ftransx", desc: "" }],
+            returns: { type: "void", desc: "" },
+          }),
+          signer: transactionSigner,
+          methodArgs: [assetTransferTxnWithSigner],
+          sender: activeAccount.address,
+          suggestedParams: { ...suggestedParams, fee: Number(30) },
+        })
+      }
+
+      // Execute the transaction
+      const result = await atc.execute(algodClient, 4)
+
+      // Get transaction ID from the result
+      for (const mr of result.methodResults) {
+        console.log(`${mr.returnValue}`)
+        setTxId(mr.txID)
+      }
 
       // Update status and notify user
       setTransactionStatus("success")
@@ -135,12 +159,6 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
         title: "Deposit successful!",
         description: `${depositAmount} ALGOS has been added to your account.`,
       })
-
-
-
-
-
-
 
       // Wait a moment before proceeding
       setTimeout(() => {
@@ -177,6 +195,10 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
     )
   }
 
+  // Determine if the active account is player1 or player2
+  const playerRole =
+    activeAccount && player1Address ? (activeAccount.address === player1Address ? "Player 1" : "Player 2") : "Unknown"
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -204,6 +226,13 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
           <div className="bg-muted/50 p-3 rounded-lg flex flex-col gap-1">
             <span className="text-sm font-medium">Game Address</span>
             <span className="text-xs break-all">{gameAddress}</span>
+          </div>
+        )}
+
+        {activeAccount && player1Address && (
+          <div className="bg-blue-500/10 text-blue-500 p-3 rounded-lg text-sm flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+            <span>You are joining as {playerRole}</span>
           </div>
         )}
 
