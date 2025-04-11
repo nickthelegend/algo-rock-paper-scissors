@@ -1,21 +1,79 @@
 "use client"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConnectWallet } from "@/components/connect-wallet"
-import { Users, AlertCircle } from "lucide-react"
+import { Users, AlertCircle, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@txnlab/use-wallet-react"
+import { GameClient } from "@/contracts/GameClient"
+import algosdk from "algosdk"
+import { useToast } from "@/hooks/use-toast"
 
 export default function Home() {
   const router = useRouter()
   const { activeAccount } = useWallet()
+  const [isCreating, setIsCreating] = useState(false)
+  const { toast } = useToast()
 
   const handleCreateGame = async () => {
-    // Simulate the server action
-    const gameId = Math.floor(100000000 + Math.random() * 900000000).toString()
-    router.push(`/game/${gameId}`)
+    if (!activeAccount) {
+      toast({
+        title: "Wallet not connected",
+        description: "Please connect your wallet to create a game.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setIsCreating(true)
+
+      // Initialize Algorand client
+      const algorandClient = new algosdk.Algodv2("", "https://testnet-api.algonode.cloud", "443")
+
+      // Initialize admin account from mnemonic
+      const admin = algosdk.mnemonicToSecretKey(
+        "certain prevent choose close sail exile predict penalty hip silver syrup amount maximum domain income liquid evoke hockey thunder twenty labor play proud absent birth",
+      )
+
+      // Create GameClient
+      const Caller = new GameClient(
+        {
+          sender: admin,
+          resolveBy: "id",
+          id: 0,
+        },
+        algorandClient,
+      )
+
+      // Create application
+      await Caller.create.createApplication({
+        player1: activeAccount.address
+      })
+
+      // Get application reference
+      const { appId, appAddress } = await Caller.appClient.getAppReference()
+
+      toast({
+        title: "Game created successfully!",
+        description: `Game ID: ${appId}`,
+      })
+
+      // Navigate to the game page using the appId as gameId
+      router.push(`/game/${appId}`)
+    } catch (error) {
+      console.error("Error creating game:", error)
+      toast({
+        title: "Failed to create game",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsCreating(false)
+    }
   }
 
   return (
@@ -58,8 +116,15 @@ export default function Home() {
           )}
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button onClick={handleCreateGame} className="w-full" size="lg" disabled={!activeAccount}>
-            Create New Game
+          <Button onClick={handleCreateGame} className="w-full" size="lg" disabled={!activeAccount || isCreating}>
+            {isCreating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Creating Game...
+              </>
+            ) : (
+              "Create New Game"
+            )}
           </Button>
           <div className="flex items-center justify-center w-full">
             <div className="flex items-center gap-2">
