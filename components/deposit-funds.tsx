@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Wallet, CreditCard, Coins } from 'lucide-react'
+import { Wallet, Coins } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useWallet } from "@txnlab/use-wallet-react"
 
@@ -61,20 +61,6 @@ export function DepositFunds({ onDeposit }: DepositFundsProps) {
           <div className="text-sm text-muted-foreground">Fixed deposit amount</div>
         </div>
 
-        <div className="space-y-2">
-          <div className="text-sm font-medium">Payment Method</div>
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="flex items-center justify-center gap-2 h-16">
-              <CreditCard className="h-5 w-5" />
-              <span>Credit Card</span>
-            </Button>
-            <Button variant="outline" className="flex items-center justify-center gap-2 h-16">
-              <Coins className="h-5 w-5" />
-              <span>Crypto</span>
-            </Button>
-          </div>
-        </div>
-
         <div className="bg-muted/50 p-3 rounded-lg flex items-center justify-between">
           <span className="text-sm">Your Balance</span>
           <span className="font-bold">0 ALGOS</span>
@@ -88,12 +74,7 @@ export function DepositFunds({ onDeposit }: DepositFundsProps) {
       </CardContent>
 
       <CardFooter>
-        <Button 
-          onClick={handleDeposit} 
-          className="w-full" 
-          size="lg" 
-          disabled={isProcessing || !activeAccount}
-        >
+        <Button onClick={handleDeposit} className="w-full" size="lg" disabled={isProcessing || !activeAccount}>
           {isProcessing ? (
             <>
               <motion.div
