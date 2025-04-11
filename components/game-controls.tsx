@@ -6,7 +6,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { type Choice, type GameState, makeChoice } from "@/lib/actions"
-import { HandIcon as HandRock, HandIcon as HandPaper, Scissors } from "lucide-react"
+import Image from "next/image"
 
 type GameControlsProps = {
   gameId: string
@@ -30,10 +30,10 @@ export function GameControls({ gameId, isPlayer1, setGameState }: GameControlsPr
     setIsSubmitting(false)
   }
 
-  const choices: { value: Choice; icon: React.ReactNode; label: string }[] = [
-    { value: "rock", icon: <HandRock className="h-8 w-8" />, label: "Rock" },
-    { value: "paper", icon: <HandPaper className="h-8 w-8" />, label: "Paper" },
-    { value: "scissors", icon: <Scissors className="h-8 w-8" />, label: "Scissors" },
+  const choices: { value: Choice; image: string; label: string }[] = [
+    { value: "rock", image: "/rock.png", label: "Rock" },
+    { value: "paper", image: "/paper.png", label: "Paper" },
+    { value: "scissors", image: "/scissors.png", label: "Scissors" },
   ]
 
   return (
@@ -51,11 +51,19 @@ export function GameControls({ gameId, isPlayer1, setGameState }: GameControlsPr
           >
             <Button
               variant={selectedChoice === choice.value ? "default" : "outline"}
-              className="w-full h-24 flex flex-col items-center justify-center gap-2"
+              className="w-full h-24 flex flex-col items-center justify-center gap-2 p-2"
               onClick={() => !hasSubmitted && handleChoiceSelection(choice.value)}
               disabled={hasSubmitted || isSubmitting}
             >
-              {choice.icon}
+              <div className="relative w-12 h-12">
+                <Image
+                  src={choice.image || "/placeholder.svg"}
+                  alt={choice.label}
+                  fill
+                  className="object-contain"
+                  sizes="48px"
+                />
+              </div>
               <span>{choice.label}</span>
             </Button>
           </motion.div>

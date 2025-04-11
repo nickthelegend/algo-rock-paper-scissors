@@ -6,8 +6,9 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { type Choice, type GameState, resetGame } from "@/lib/actions"
-import { HandIcon as HandRock, HandIcon as HandPaper, Scissors, RotateCcw } from "lucide-react"
+import { RotateCcw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 
 type GameResultProps = {
   result: "player1" | "player2" | "draw" | null
@@ -28,17 +29,14 @@ export function GameResult({ result, player1Choice, player2Choice, gameId, isPla
     setIsResetting(false)
   }
 
-  const getChoiceIcon = (choice: Choice) => {
-    switch (choice) {
-      case "rock":
-        return <HandRock className="h-12 w-12" />
-      case "paper":
-        return <HandPaper className="h-12 w-12" />
-      case "scissors":
-        return <Scissors className="h-12 w-12" />
-      default:
-        return null
-    }
+  const getChoiceImage = (choice: Choice) => {
+    if (!choice) return null
+
+    return (
+      <div className="relative w-16 h-16">
+        <Image src={`/${choice}.png`} alt={choice} fill className="object-contain" sizes="64px" />
+      </div>
+    )
   }
 
   const getResultMessage = () => {
@@ -75,7 +73,7 @@ export function GameResult({ result, player1Choice, player2Choice, gameId, isPla
               animate={{ rotateY: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              {getChoiceIcon(player1Choice)}
+              {getChoiceImage(player1Choice)}
             </motion.div>
             <div className="text-xs capitalize">{player1Choice}</div>
           </div>
@@ -87,7 +85,7 @@ export function GameResult({ result, player1Choice, player2Choice, gameId, isPla
               animate={{ rotateY: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              {getChoiceIcon(player2Choice)}
+              {getChoiceImage(player2Choice)}
             </motion.div>
             <div className="text-xs capitalize">{player2Choice}</div>
           </div>

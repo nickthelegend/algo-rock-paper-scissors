@@ -29,7 +29,7 @@ export type GameState = {
 const games = new Map<string, GameState>()
 
 // Initialize a game
-export function initializeGame(gameId: string): GameState {
+export async function initializeGame(gameId: string): Promise<GameState> {
   if (!games.has(gameId)) {
     games.set(gameId, {
       player1Choice: null,
@@ -43,8 +43,8 @@ export function initializeGame(gameId: string): GameState {
 }
 
 // Join a game
-export function joinGame(gameId: string, isPlayer1: boolean): GameState {
-  const game = initializeGame(gameId)
+export async function joinGame(gameId: string, isPlayer1: boolean): Promise<GameState> {
+  const game = await initializeGame(gameId)
 
   if (isPlayer1) {
     game.player1Connected = true
@@ -57,8 +57,8 @@ export function joinGame(gameId: string, isPlayer1: boolean): GameState {
 }
 
 // Make a choice
-export function makeChoice(gameId: string, isPlayer1: boolean, choice: Choice): GameState {
-  const game = games.get(gameId) || initializeGame(gameId)
+export async function makeChoice(gameId: string, isPlayer1: boolean, choice: Choice): Promise<GameState> {
+  const game = games.get(gameId) || (await initializeGame(gameId))
 
   if (isPlayer1) {
     game.player1Choice = choice
@@ -91,8 +91,8 @@ function determineWinner(player1Choice: Choice, player2Choice: Choice): "player1
 }
 
 // Reset the game
-export function resetGame(gameId: string): GameState {
-  const game = games.get(gameId) || initializeGame(gameId)
+export async function resetGame(gameId: string): Promise<GameState> {
+  const game = games.get(gameId) || (await initializeGame(gameId))
 
   game.player1Choice = null
   game.player2Choice = null
