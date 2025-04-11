@@ -7,23 +7,88 @@ import { Button } from "@/components/ui/button"
 import { GameControls } from "@/components/game-controls"
 import { GameResult } from "@/components/game-result"
 import { type GameState, joinGame } from "@/lib/actions"
-import { Copy, Share2, Wallet } from "lucide-react"
+import { Copy, Share2, Wallet, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 import { ConnectWallet } from "@/components/connect-wallet"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useWallet } from "@txnlab/use-wallet-react"
 import { DepositFunds } from "@/components/deposit-funds"
+import { fetchApplicationState, hasPlayerDeposited, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
+import { getGameByAppId } from "@/lib/supabase"
 
 export function GameRoom({ gameId }: { gameId: string }) {
-  const [isPlayer1, setIsPlayer1] = useState<boolean>(false) // Default to false instead of null
+  const [isPlayer1, setIsPlayer1] = useState<boolean>(false)
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [copied, setCopied] = useState(false)
   const [hasDeposited, setHasDeposited] = useState(false)
+  const [needsDeposit, setNeedsDeposit] = useState(false)
   const [balance, setBalance] = useState(0)
-  const [isJoined, setIsJoined] = useState(false) // Track if player has joined
+  const [isJoined, setIsJoined] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [appState, setAppState] = useState<any>(null)
+  const [player1Address, setPlayer1Address] = useState<string | null>(null)
   const { toast } = useToast()
   const { activeAccount } = useWallet()
+
+  // Fetch application state and check if player has deposited
+  useEffect(() => {
+    const checkApplicationState = async () => {
+      if (!activeAccount) return
+
+      try {
+        setIsLoading(true)
+
+        // Fetch game info from Supabase
+        const game = await getGameByAppId(Number(gameId))
+        if (game) {
+          setPlayer1Address(game.player1_address)
+          // Determine if current user is player1
+          const currentIsPlayer1 = activeAccount.address === game.player1_address
+          setIsPlayer1(currentIsPlayer1)
+        }
+
+        // Fetch application state from Algorand
+        const state = await fetchApplicationState(Number(gameId))
+        setAppState(state)
+
+        // Check if player has deposited
+        const player1Deposited = hasPlayerDeposited(state, PLAYER1_KEY)
+        const player2Deposited = hasPlayerDeposited(state, PLAYER2_KEY)
+
+        if (isPlayer1) {
+          // If player1, check if player1 has deposited
+          if (player1Deposited) {
+            setHasDeposited(true)
+            setNeedsDeposit(false)
+          } else {
+            setNeedsDeposit(true)
+          }
+        } else {
+          // If player2, check if player2 has deposited
+          if (player2Deposited) {
+            setHasDeposited(true)
+            setNeedsDeposit(false)
+          } else {
+            setNeedsDeposit(true)
+          }
+        }
+
+        setIsJoined(true)
+      } catch (error) {
+        console.error("Error checking application state:", error)
+        toast({
+          title: "Error",
+          description: "Failed to check game state. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkApplicationState()
+  }, [gameId, activeAccount, toast, isPlayer1])
 
   // Join the game as player 1 if we're the creator
   useEffect(() => {
@@ -66,6 +131,33 @@ export function GameRoom({ gameId }: { gameId: string }) {
   const handleDeposit = (amount: number) => {
     setBalance(amount)
     setHasDeposited(true)
+    setNeedsDeposit(false)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
+        <div className="absolute top-4 right-4 flex items-center gap-4">
+          <ConnectWallet />
+          <ThemeToggle />
+        </div>
+
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold">Loading Game</CardTitle>
+            <CardDescription>Checking game state...</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center py-8">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            >
+              <Loader2 className="h-8 w-8 text-primary" />
+            </motion.div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -94,8 +186,13 @@ export function GameRoom({ gameId }: { gameId: string }) {
             <ConnectWallet />
           </CardContent>
         </Card>
-      ) : !hasDeposited ? (
-        <DepositFunds onDeposit={handleDeposit} gameId={Number.parseInt(gameId)} />
+      ) : needsDeposit ? (
+        <DepositFunds
+          onDeposit={handleDeposit}
+          gameId={Number.parseInt(gameId)}
+          isPlayer1={isPlayer1}
+          player1Address={player1Address}
+        />
       ) : (
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
@@ -130,7 +227,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
                 exit={{ opacity: 0 }}
                 className="w-full"
               >
-                <GameControls gameId={gameId} isPlayer1={isPlayer1} setGameState={setGameState} />
+                <GameControls gameId={gameId} isPlayer1={isPlayer1} setGameState={setGameState} appState={appState} />
               </motion.div>
             </AnimatePresence>
 

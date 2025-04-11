@@ -9,19 +9,22 @@ import { useToast } from "@/hooks/use-toast"
 import { useWallet } from "@txnlab/use-wallet-react"
 import algosdk from "algosdk"
 import { getGameByAppId } from "@/lib/supabase"
+import { fetchApplicationState, hasPlayerDeposited, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
 
 interface DepositFundsProps {
   onDeposit: (amount: number) => void
   gameId: number
+  isPlayer1: boolean
+  player1Address: string | null
 }
 
-export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
+export function DepositFunds({ onDeposit, gameId, isPlayer1, player1Address }: DepositFundsProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [transactionStatus, setTransactionStatus] = useState<"idle" | "processing" | "success" | "error">("idle")
   const [txId, setTxId] = useState<string | null>(null)
   const [gameAddress, setGameAddress] = useState<string | null>(null)
-  const [player1Address, setPlayer1Address] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [appState, setAppState] = useState<any>(null)
   const { toast } = useToast()
   const { activeAccount, transactionSigner } = useWallet()
 
@@ -37,16 +40,16 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
     "",
   )
 
-  // Fetch game address from Supabase
+  // Fetch game address and application state
   useEffect(() => {
-    async function fetchGameAddress() {
+    async function fetchGameInfo() {
       try {
         setIsLoading(true)
-        const game = await getGameByAppId(gameId)
 
+        // Fetch game info from Supabase
+        const game = await getGameByAppId(gameId)
         if (game && game.app_address) {
           setGameAddress(game.app_address)
-          setPlayer1Address(game.player1_address)
         } else {
           toast({
             title: "Game not found",
@@ -54,8 +57,24 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
             variant: "destructive",
           })
         }
+
+        // Fetch application state from Algorand
+        const state = await fetchApplicationState(gameId)
+        setAppState(state)
+
+        // Check if player has already deposited
+        const player1Deposited = hasPlayerDeposited(state, PLAYER1_KEY)
+        const player2Deposited = hasPlayerDeposited(state, PLAYER2_KEY)
+
+        if (isPlayer1 && player1Deposited) {
+          // Player 1 has already deposited
+          onDeposit(depositAmount)
+        } else if (!isPlayer1 && player2Deposited) {
+          // Player 2 has already deposited
+          onDeposit(depositAmount)
+        }
       } catch (error) {
-        console.error("Error fetching game address:", error)
+        console.error("Error fetching game info:", error)
         toast({
           title: "Error",
           description: "Failed to load game information.",
@@ -66,8 +85,8 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
       }
     }
 
-    fetchGameAddress()
-  }, [gameId, toast])
+    fetchGameInfo()
+  }, [gameId, toast, onDeposit, isPlayer1])
 
   const handleDeposit = async () => {
     if (!activeAccount || !transactionSigner) {
@@ -79,10 +98,10 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
       return
     }
 
-    if (!gameAddress || !player1Address) {
+    if (!gameAddress) {
       toast({
-        title: "Game information not found",
-        description: "Could not find the game information for deposit.",
+        title: "Game address not found",
+        description: "Could not find the game address for deposit.",
         variant: "destructive",
       })
       return
@@ -111,12 +130,12 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
       }
 
       // Check if the active account is player1 or player2
-      const isPlayer1 = activeAccount.address === player1Address
+      const currentIsPlayer1 = player1Address && activeAccount.address === player1Address
 
       // Call the appropriate method based on player identity
-      if (isPlayer1) {
+      if (currentIsPlayer1) {
         atc.addMethodCall({
-          appID: Number(gameId),
+          appID: gameId,
           method: new algosdk.ABIMethod({
             name: "depositfundsPlayer1",
             desc: "",
@@ -130,7 +149,7 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
         })
       } else {
         atc.addMethodCall({
-          appID: Number(gameId),
+          appID: gameId,
           method: new algosdk.ABIMethod({
             name: "depositfundsPlayer2",
             desc: "",
@@ -196,8 +215,7 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
   }
 
   // Determine if the active account is player1 or player2
-  const playerRole =
-    activeAccount && player1Address ? (activeAccount.address === player1Address ? "Player 1" : "Player 2") : "Unknown"
+  const playerRole = isPlayer1 ? "Player 1" : "Player 2"
 
   return (
     <Card className="w-full max-w-md">
@@ -206,7 +224,11 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
           <Wallet className="h-6 w-6 text-primary" />
           Deposit Funds
         </CardTitle>
-        <CardDescription>Add funds to your account to start playing</CardDescription>
+        <CardDescription>
+          {isPlayer1
+            ? "Player 1 needs to deposit funds to start the game"
+            : "Player 2 needs to deposit funds to join the game"}
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -229,12 +251,10 @@ export function DepositFunds({ onDeposit, gameId }: DepositFundsProps) {
           </div>
         )}
 
-        {activeAccount && player1Address && (
-          <div className="bg-blue-500/10 text-blue-500 p-3 rounded-lg text-sm flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-            <span>You are joining as {playerRole}</span>
-          </div>
-        )}
+        <div className="bg-blue-500/10 text-blue-500 p-3 rounded-lg text-sm flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+          <span>You are joining as {playerRole}</span>
+        </div>
 
         {!activeAccount && (
           <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-lg text-sm flex items-center gap-2">

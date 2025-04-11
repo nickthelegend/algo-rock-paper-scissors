@@ -1,0 +1,47 @@
+{
+  "application": {
+    "created-at-round": 50498602,
+    "deleted": false,
+    "id": 737296539,
+    "params": {
+      "approval-program": "CiAEAQAgkAMmAw9kZXBvc2l0ZWRBbW91bnQHcGxheWVyMgdwbGF5ZXIxMRgUgQYLMRkIjQwA9AAAAAAAAAAAAAAA5gAAAAAAAAAAAAAANhoBSRUkEkSIAAIiQ4oBACqL/2coI2eAEG1heERlcG9zaXRBbW91bnSBBWeJiAACIkOKAACAC3BsYXllcjFNb3ZlJblIgAtwbGF5ZXIyTW92ZSW5SIkxFiIJSTgQIhJEiAACIkOKAQAxADYyAHIHSBJJQAAGMQAqZBIRSUAABjEAKWQSEUSL/zgHMgoSRChki/84CAgoTGeJNhoBSRUkEkSIAAIiQ4oBADEANjIAcgdIEkSxIrIQi/+yByhksggjsgGzKCNniTYaAUkVJBJEiAACIkOKAQA2MgApZUxIFEQpi/9niYAE0yS+pDYaAI4B/w4AgATqBFA2gAQJqFDqgAQ6GdDegAQ3/p3MNhoAjgT/Ff8+/4H/rwA=",
+      "clear-state-program": "Cg==",
+      "creator": "DWZX2YSNBJFZS7P53TCW37MOZ4O2YOJTK75HMIBOBVBAILY4EZIF4DKC6Q",
+      "global-state": [
+        {
+          "key": "cGxheWVyMQ==",
+          "value": {
+            "bytes": "ufPjd9/wcFZSeP9+8gq+yOVUM2G/JcnDXl5SuIS5z48=",
+            "type": 1,
+            "uint": 0
+          }
+        },
+        {
+          "key": "ZGVwb3NpdGVkQW1vdW50",
+          "value": {
+            "bytes": "",
+            "type": 2,
+            "uint": 5000000
+          }
+        },
+        {
+          "key": "bWF4RGVwb3NpdEFtb3VudA==",
+          "value": {
+            "bytes": "",
+            "type": 2,
+            "uint": 5
+          }
+        }
+      ],
+      "global-state-schema": {
+        "num-byte-slice": 4,
+        "num-uint": 2
+      },
+      "local-state-schema": {
+        "num-byte-slice": 0,
+        "num-uint": 0
+      }
+    }
+  },
+  "current-round": 50498909
+}

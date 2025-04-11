@@ -2,22 +2,77 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { type Choice, type GameState, makeChoice } from "@/lib/actions"
 import Image from "next/image"
+import { useWallet } from "@txnlab/use-wallet-react"
+import { getGameByAppId } from "@/lib/supabase"
+import { hasPlayerDeposited, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
 
 type GameControlsProps = {
   gameId: string
   isPlayer1: boolean
   setGameState: React.Dispatch<React.SetStateAction<GameState | null>>
+  appState?: any
 }
 
-export function GameControls({ gameId, isPlayer1, setGameState }: GameControlsProps) {
+export function GameControls({ gameId, isPlayer1, setGameState, appState }: GameControlsProps) {
   const [selectedChoice, setSelectedChoice] = useState<Choice>(null)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [playerName, setPlayerName] = useState<string>("")
+  const [opponentName, setOpponentName] = useState<string>("")
+  const [isLoading, setIsLoading] = useState(true)
+  const [waitingForOpponent, setWaitingForOpponent] = useState(false)
+  const { activeAccount } = useWallet()
+
+  // Check if both players have deposited
+  useEffect(() => {
+    if (appState) {
+      const player1Deposited = hasPlayerDeposited(appState, PLAYER1_KEY)
+      const player2Deposited = hasPlayerDeposited(appState, PLAYER2_KEY)
+
+      setWaitingForOpponent(!player1Deposited || !player2Deposited)
+    }
+  }, [appState])
+
+  // Fetch game information to get player addresses
+  useEffect(() => {
+    async function fetchGameInfo() {
+      try {
+        setIsLoading(true)
+        const game = await getGameByAppId(Number(gameId))
+
+        if (game) {
+          // If we have the active account, determine if we're player 1 or 2
+          if (activeAccount) {
+            const isCurrentPlayer1 = activeAccount.address === game.player1_address
+
+            // Set player names based on addresses
+            if (isCurrentPlayer1) {
+              setPlayerName(`Player 1 (You)`)
+              setOpponentName(`Player 2${game.player2_address ? "" : " (Waiting to join)"}`)
+            } else {
+              setPlayerName(`Player 2 (You)`)
+              setOpponentName(`Player 1`)
+            }
+          } else {
+            // Fallback if no active account
+            setPlayerName(isPlayer1 ? "Player 1 (You)" : "Player 2 (You)")
+            setOpponentName(isPlayer1 ? "Player 2" : "Player 1")
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching game info:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchGameInfo()
+  }, [gameId, activeAccount, isPlayer1])
 
   const handleChoiceSelection = async (choice: Choice) => {
     setSelectedChoice(choice)
@@ -36,11 +91,35 @@ export function GameControls({ gameId, isPlayer1, setGameState }: GameControlsPr
     { value: "scissors", image: "/scissors.png", label: "Scissors" },
   ]
 
+  if (waitingForOpponent) {
+    return (
+      <div className="w-full space-y-6">
+        <div className="text-center space-y-4">
+          <h3 className="text-lg font-medium">Waiting for opponent to deposit funds</h3>
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+            className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg"
+          >
+            <p>Both players need to deposit funds before the game can start.</p>
+            <p className="text-sm mt-2">Share the game link with your friend to join!</p>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full space-y-6">
-      <h3 className="text-center text-lg font-medium">
-        {hasSubmitted ? "Waiting for opponent..." : `You are Player ${isPlayer1 ? "1" : "2"}. Make your choice!`}
-      </h3>
+      <div className="text-center space-y-2">
+        <h3 className="text-lg font-medium">
+          {hasSubmitted ? "Waiting for opponent..." : `${playerName}, make your choice!`}
+        </h3>
+        <div className="flex justify-center gap-4">
+          <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">{playerName}</div>
+          <div className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm">vs {opponentName}</div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-3 gap-2">
         {choices.map((choice) => (
