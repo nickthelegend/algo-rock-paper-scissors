@@ -1,6 +1,5 @@
 # Rock-Paper-Scissors
 
-
 # 🪨📄✂️ Algo Rock-Paper-Scissors
 
 A decentralized, trustless Rock-Paper-Scissors game built with ****Next.js**** and powered by **Algorand smart contracts** **.** **This project leverages the **[TealScript](https://github.com/algorandfoundation/tealscript)** framework to manage game logic on-chain, ensuring fairness and transparency.**
@@ -35,7 +34,7 @@ export class Game extends Contract {
 
     createApplication(): void {
 
-      
+    
         this.depositedAmount.value = 0;
         this.maxDepositAmount.value = 5;
 
@@ -171,15 +170,12 @@ export class Game extends Contract {
 6. **Game Reset:**
    * **The contract resets the game state, allowing for a new game to commence.**
 
-
 ## 🛠️ Tech Stack
 
 * **Frontend:** **Next.js, Tailwind CSS**
 * **Blockchain:** **Algorand Smart Contracts via TealScript**
 * **Wallet Integration:** **Algorand Wallet Connect**
 * **Deployment:** **Vercel**
-
-
 
 ## TODO
 
@@ -189,3 +185,7 @@ export class Game extends Contract {
 * [X] Listening to the player's Moves
 * [X] once a player move is done it is recorded into the smart contracts's box , i should implement the storage of the move and the move should be encrypted also so that the other player shouldnt know the move
 * [X] Encrypt the moves while sending
+
+## 🤝 Contribution
+
+**Contributions are welcome!** **If you'd like to enhance the game, fix bugs, or add new features, feel free to fork the repository and submit a pull request**
