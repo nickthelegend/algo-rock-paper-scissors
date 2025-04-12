@@ -7,15 +7,16 @@ import { Button } from "@/components/ui/button"
 import { GameControls } from "@/components/game-controls"
 import { GameResult } from "@/components/game-result"
 import { type GameState, joinGame } from "@/lib/actions"
-import { Copy, Share2, Wallet, Loader2 } from "lucide-react"
+import { Copy, Share2, Wallet, Loader2, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 import { ConnectWallet } from "@/components/connect-wallet"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useWallet } from "@txnlab/use-wallet-react"
 import { DepositFunds } from "@/components/deposit-funds"
-import { fetchApplicationState, hasPlayerDeposited, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
+import { fetchApplicationState, hasPlayerDeposited, isGameFinished, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
 import { getGameByAppId } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
 
 export function GameRoom({ gameId }: { gameId: string }) {
   const [isPlayer1, setIsPlayer1] = useState<boolean>(false)
@@ -29,8 +30,10 @@ export function GameRoom({ gameId }: { gameId: string }) {
   const [appState, setAppState] = useState<any>(null)
   const [player1Address, setPlayer1Address] = useState<string | null>(null)
   const [player2Address, setPlayer2Address] = useState<string | null>(null)
+  const [isGameFinishedState, setIsGameFinishedState] = useState(false)
   const { toast } = useToast()
   const { activeAccount } = useWallet()
+  const router = useRouter()
 
   // Fetch application state and check if player has deposited
   useEffect(() => {
@@ -57,11 +60,30 @@ export function GameRoom({ gameId }: { gameId: string }) {
             // In a real app, you would update the database here
             setPlayer2Address(activeAccount.address)
           }
+
+          // Check if game is already completed in Supabase
+          if (game.status === "completed") {
+            setIsGameFinishedState(true)
+            toast({
+              title: "Game is already finished",
+              description: "This game has already been completed. You cannot play again.",
+            })
+          }
         }
 
         // Fetch application state from Algorand
         const state = await fetchApplicationState(Number(gameId))
         setAppState(state)
+
+        // Check if game is finished on the blockchain
+        const finished = isGameFinished(state)
+        if (finished) {
+          setIsGameFinishedState(true)
+          toast({
+            title: "Game is already finished",
+            description: "This game has already been completed. You cannot play again.",
+          })
+        }
 
         // Check if player has deposited
         const player1Deposited = hasPlayerDeposited(state, PLAYER1_KEY)
@@ -166,6 +188,11 @@ export function GameRoom({ gameId }: { gameId: string }) {
     }
   }
 
+  // Function to create a new game
+  const handleCreateNewGame = () => {
+    router.push("/")
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
@@ -186,6 +213,42 @@ export function GameRoom({ gameId }: { gameId: string }) {
             >
               <Loader2 className="h-8 w-8 text-primary" />
             </motion.div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // If the game is finished and there's no result yet, show a message
+  if (isGameFinishedState && !gameState?.result) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
+        <div className="absolute top-4 right-4 flex items-center gap-4">
+          <ConnectWallet />
+          <ThemeToggle />
+        </div>
+
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold">Game Completed</CardTitle>
+            <CardDescription>This game has already been finished</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center py-8 space-y-6">
+            <div className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              <div>
+                <p>This game has already been completed.</p>
+                <p className="text-sm mt-1">You need to create a new game to play again.</p>
+              </div>
+            </div>
+
+            <div className="relative w-24 h-24">
+              <Image src="/rock.png" alt="Rock Paper Scissors" fill className="object-contain" sizes="96px" />
+            </div>
+
+            <Button onClick={handleCreateNewGame} className="w-full">
+              Create New Game
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -238,7 +301,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
           </CardHeader>
 
           <CardContent className="flex flex-col items-center space-y-6">
-            {isPlayer1 && (
+            {isPlayer1 && !isGameFinishedState && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full">
                 <Button
                   onClick={copyGameLink}
@@ -259,12 +322,22 @@ export function GameRoom({ gameId }: { gameId: string }) {
                 exit={{ opacity: 0 }}
                 className="w-full"
               >
-                <GameControls
-                  gameId={gameId}
-                  isPlayer1={isPlayer1}
-                  setGameState={handleGameStateUpdate}
-                  appState={appState}
-                />
+                {!isGameFinishedState ? (
+                  <GameControls
+                    gameId={gameId}
+                    isPlayer1={isPlayer1}
+                    setGameState={handleGameStateUpdate}
+                    appState={appState}
+                  />
+                ) : (
+                  <div className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                    <div>
+                      <p>This game has been completed.</p>
+                      <p className="text-sm mt-1">Create a new game to play again.</p>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             </AnimatePresence>
 

@@ -29,7 +29,23 @@ export async function fetchApplicationState(appId: number) {
     return globalState.some((item: any) => item.key === playerKey)
   }
   
+  // Function to check if the game is finished (has a winner)
+  export function isGameFinished(appState: any): boolean {
+    if (
+      !appState ||
+      !appState.application ||
+      !appState.application.params ||
+      !appState.application.params["global-state"]
+    ) {
+      return false
+    }
+  
+    const globalState = appState.application.params["global-state"]
+    return globalState.some((item: any) => item.key === "d2lubmVy") // "winner" in base64
+  }
+  
   // Base64 encoded keys
   export const PLAYER1_KEY = "cGxheWVyMQ=="
   export const PLAYER2_KEY = "cGxheWVyMg=="
+  export const WINNER_KEY = "d2lubmVy"
   

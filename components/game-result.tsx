@@ -6,11 +6,14 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { type Choice, type GameState, resetGame } from "@/lib/actions"
-import { RotateCcw } from "lucide-react"
+import { RotateCcw, AlertCircle } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import algosdk from "algosdk"
 import { useToast } from "@/hooks/use-toast"
+import { updateGameStatus } from "@/lib/supabase"
+import { fetchApplicationState, isGameFinished } from "@/lib/algorand"
+import { useRouter } from "next/navigation"
 
 type GameResultProps = {
   result: "player1" | "player2" | "draw" | null
@@ -49,17 +52,51 @@ export function GameResult({
   player2Address,
 }: GameResultProps) {
   const [isResetting, setIsResetting] = useState(false)
+  const [isGameOver, setIsGameOver] = useState(false)
   const { toast } = useToast()
+  const router = useRouter()
+
+  // Check if the game is already finished
+  useEffect(() => {
+    const checkGameStatus = async () => {
+      try {
+        const appState = await fetchApplicationState(Number(gameId))
+        const finished = isGameFinished(appState)
+        setIsGameOver(finished)
+        
+        if (finished) {
+          toast({
+            title: "Game is already finished",
+            description: "This game has already been completed. You cannot play again.",
+          })
+        }
+      } catch (error) {
+        console.error("Error checking game status:", error)
+      }
+    }
+    
+    checkGameStatus()
+  }, [gameId, toast])
 
   useEffect(() => {
     // Define an async function inside useEffect
     const processGameResult = async () => {
+      // Skip if the game is already over
+      if (isGameOver) return
+      
       // Log the winner to the console
       if (result === "draw") {
         console.log("Game Result: It's a draw!")
+        
+        // Update game status in Supabase
+        await updateGameStatus(Number(gameId), "completed", "draw")
+        
       } else if (result === "player1") {
         console.log("Game Result: Player 1 won!")
         console.log(`Player 1 chose ${player1Choice} and Player 2 chose ${player2Choice}`)
+
+        // Update game status in Supabase
+        await updateGameStatus(Number(gameId), "completed", "player1")
 
         if (player1Address) {
           try {
@@ -73,16 +110,19 @@ export function GameResult({
             )
 
             const atc = new algosdk.AtomicTransactionComposer()
+            
+            // Set winner in the smart contract
             atc.addMethodCall({
               appID: Number(gameId),
-              method: METHODS[1], // sendFunds method
+              method: METHODS[1], // setWinner method
               signer: algosdk.makeBasicAccountTransactionSigner(admin),
               methodArgs: [player1Address],
               sender: admin.addr,
               suggestedParams: { ...suggestedParams, fee: Number(30) },
-              appAccounts:[player1Address]
+              appAccounts: [player1Address]
             })
-            // Add method call to send funds to winner
+            
+            // Send funds to winner
             atc.addMethodCall({
               appID: Number(gameId),
               method: METHODS[0], // sendFunds method
@@ -90,7 +130,7 @@ export function GameResult({
               methodArgs: [player1Address],
               sender: admin.addr,
               suggestedParams: { ...suggestedParams, fee: Number(30) },
-              appAccounts:[player1Address]
+              appAccounts: [player1Address]
             })
 
             // Execute the transaction
@@ -104,6 +144,10 @@ export function GameResult({
               title: "Funds sent to winner",
               description: "The prize has been sent to Player 1's wallet",
             })
+            
+            // Mark the game as over
+            setIsGameOver(true)
+            
           } catch (error) {
             console.error("Error sending funds to winner:", error)
             toast({
@@ -116,6 +160,9 @@ export function GameResult({
       } else if (result === "player2") {
         console.log("Game Result: Player 2 won!")
         console.log(`Player 1 chose ${player1Choice} and Player 2 chose ${player2Choice}`)
+        
+        // Update game status in Supabase
+        await updateGameStatus(Number(gameId), "completed", "player2")
 
         if (player2Address) {
           try {
@@ -125,7 +172,7 @@ export function GameResult({
               "https://testnet-api.algonode.cloud",
               "",
             )
-                        const suggestedParams = await algodClient.getTransactionParams().do()
+            const suggestedParams = await algodClient.getTransactionParams().do()
 
             // Initialize admin account from mnemonic
             const admin = algosdk.mnemonicToSecretKey(
@@ -134,18 +181,18 @@ export function GameResult({
 
             const atc = new algosdk.AtomicTransactionComposer()
 
-
-
+            // Set winner in the smart contract
             atc.addMethodCall({
               appID: Number(gameId),
-              method: METHODS[1], // sendFunds method
+              method: METHODS[1], // setWinner method
               signer: algosdk.makeBasicAccountTransactionSigner(admin),
               methodArgs: [player2Address],
               sender: admin.addr,
               suggestedParams: { ...suggestedParams, fee: Number(30) },
-              appAccounts:[player2Address]
+              appAccounts: [player2Address]
             })
-            // Add method call to send funds to winner
+            
+            // Send funds to winner
             atc.addMethodCall({
               appID: Number(gameId),
               method: METHODS[0], // sendFunds method
@@ -153,8 +200,7 @@ export function GameResult({
               methodArgs: [player2Address],
               sender: admin.addr,
               suggestedParams: { ...suggestedParams, fee: Number(30) },
-              appAccounts:[player2Address]
-
+              appAccounts: [player2Address]
             })
 
             // Execute the transaction
@@ -168,6 +214,10 @@ export function GameResult({
               title: "Funds sent to winner",
               description: "The prize has been sent to Player 2's wallet",
             })
+            
+            // Mark the game as over
+            setIsGameOver(true)
+            
           } catch (error) {
             console.error("Error sending funds to winner:", error)
             toast({
@@ -194,9 +244,16 @@ export function GameResult({
     if (result) {
       processGameResult()
     }
-  }, [result, player1Choice, player2Choice, isPlayer1, player1Address, player2Address, gameId, toast])
+  }, [result, player1Choice, player2Choice, isPlayer1, player1Address, player2Address, gameId, toast, isGameOver])
 
   const handleReset = async () => {
+    // If the game is over, redirect to home to create a new game
+    if (isGameOver) {
+      router.push('/')
+      return
+    }
+    
+    // Otherwise, reset the current game
     setIsResetting(true)
     const updatedGameState = await resetGame(gameId)
     setGameState(updatedGameState)
@@ -265,9 +322,18 @@ export function GameResult({
           </div>
         </div>
 
+        {isGameOver ? (
+          <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-lg flex items-center gap-2 mb-4">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <div className="text-sm">
+              This game is completed. You cannot play again with this game ID.
+            </div>
+          </div>
+        ) : null}
+
         <Button onClick={handleReset} className="w-full" disabled={isResetting}>
           <RotateCcw className="h-4 w-4 mr-2" />
-          Play Again
+          {isGameOver ? "Create New Game" : "Play Again"}
         </Button>
       </motion.div>
     </AnimatePresence>

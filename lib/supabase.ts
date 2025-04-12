@@ -51,3 +51,34 @@ export async function getGameByAppId(appId: number): Promise<Game | null> {
     return null
   }
 }
+
+// Function to update game status to completed and set winner
+export async function updateGameStatus(
+  appId: number, 
+  status: "created" | "in_progress" | "completed", 
+  winner?: "player1" | "player2" | "draw"
+): Promise<Game | null> {
+  try {
+    const updateData: Partial<Game> = { status }
+    if (winner) {
+      updateData.winner = winner
+    }
+    
+    const { data, error } = await supabase
+      .from("games")
+      .update(updateData)
+      .eq("app_id", appId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error updating game status:", error)
+      throw error
+    }
+
+    return data
+  } catch (error) {
+    console.error("Failed to update game status:", error)
+    return null
+  }
+}
