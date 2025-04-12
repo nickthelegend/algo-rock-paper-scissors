@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { type Choice, type GameState, resetGame } from "@/lib/actions"
-import { RotateCcw, AlertCircle, Trophy, Lock, Unlock } from 'lucide-react'
+import { RotateCcw, AlertCircle, Trophy, Lock, Unlock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import algosdk from "algosdk"
@@ -151,8 +151,8 @@ export function GameResult({
         console.log("Game Result: Player 1 won!")
         console.log(`Player 1 chose ${decryptedPlayer1Choice} and Player 2 chose ${decryptedPlayer2Choice}`)
 
-        // Update game status in Supabase
-        await updateGameStatus(Number(gameId), "completed", "player1")
+        // Update game status in Supabase with winner address
+        await updateGameStatus(Number(gameId), "completed", "player1", player1Address || undefined)
 
         if (player1Address) {
           try {
@@ -216,8 +216,8 @@ export function GameResult({
         console.log("Game Result: Player 2 won!")
         console.log(`Player 1 chose ${decryptedPlayer1Choice} and Player 2 chose ${decryptedPlayer2Choice}`)
 
-        // Update game status in Supabase
-        await updateGameStatus(Number(gameId), "completed", "player2")
+        // Update game status in Supabase with winner address
+        await updateGameStatus(Number(gameId), "completed", "player2", player2Address || undefined)
 
         if (player2Address) {
           try {
@@ -320,26 +320,26 @@ export function GameResult({
 
     // Otherwise, reset the current game
     setIsResetting(true)
-    
+
     try {
       // Reset the game state on the server
       const updatedGameState = await resetGame(gameId)
-      
+
       // Update the local game state to allow players to make new choices
       setGameState({
         player1Choice: null,
         player2Choice: null,
         player1Connected: true,
         player2Connected: true,
-        result: null
+        result: null,
       })
-      
+
       // Show success message
       toast({
         title: "Game Reset",
         description: "You can now make a new choice!",
       })
-      
+
       // Force reload the page to reset all UI states
       window.location.reload()
     } catch (error) {

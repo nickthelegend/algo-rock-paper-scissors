@@ -16,6 +16,7 @@ export interface Game {
   created_at?: string
   status?: "created" | "in_progress" | "completed" | string
   winner?: "player1" | "player2" | "draw"
+  winner_address?: string
 }
 
 // Function to insert a new game
@@ -52,16 +53,42 @@ export async function getGameByAppId(appId: number): Promise<Game | null> {
   }
 }
 
+// Function to update player2_address
+export async function updatePlayer2Address(appId: number, player2Address: string): Promise<Game | null> {
+  try {
+    const { data, error } = await supabase
+      .from("games")
+      .update({ player2_address: player2Address, status: "in_progress" })
+      .eq("app_id", appId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error("Error updating player2 address:", error)
+      throw error
+    }
+
+    return data
+  } catch (error) {
+    console.error("Failed to update player2 address:", error)
+    return null
+  }
+}
+
 // Function to update game status to completed and set winner
 export async function updateGameStatus(
   appId: number,
   status: "created" | "in_progress" | "completed",
   winner?: "player1" | "player2" | "draw",
+  winnerAddress?: string,
 ): Promise<Game | null> {
   try {
     const updateData: Partial<Game> = { status }
     if (winner) {
       updateData.winner = winner
+    }
+    if (winnerAddress) {
+      updateData.winner_address = winnerAddress
     }
 
     const { data, error } = await supabase.from("games").update(updateData).eq("app_id", appId).select().single()

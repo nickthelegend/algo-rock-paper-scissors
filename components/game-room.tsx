@@ -15,7 +15,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { useWallet } from "@txnlab/use-wallet-react"
 import { DepositFunds } from "@/components/deposit-funds"
 import { fetchApplicationState, hasPlayerDeposited, isGameFinished, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
-import { getGameByAppId } from "@/lib/supabase"
+import { getGameByAppId, updatePlayer2Address } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 
 export function GameRoom({ gameId }: { gameId: string }) {
@@ -42,7 +42,11 @@ export function GameRoom({ gameId }: { gameId: string }) {
       if (!activeAccount) return
 
       try {
-        setIsLoading(true)
+        // Don't set loading state during polling to avoid UI flicker
+        const isInitialLoad = isLoading
+        if (isInitialLoad) {
+          setIsLoading(true)
+        }
 
         // Fetch game info from Supabase
         const game = await getGameByAppId(Number(gameId))
@@ -60,15 +64,33 @@ export function GameRoom({ gameId }: { gameId: string }) {
           if (!game.player2_address && !currentIsPlayer1) {
             // In a real app, you would update the database here
             setPlayer2Address(activeAccount.address)
+
+            // Update player2 address in Supabase
+            const updated = await updatePlayer2Address(Number(gameId), activeAccount.address)
+            if (updated) {
+              toast({
+                title: "Joined game successfully",
+                description: "You've joined as Player 2",
+              })
+            } else {
+              toast({
+                title: "Warning",
+                description: "Joined game, but failed to update database record",
+                variant: "destructive",
+              })
+            }
           }
 
           // Check if game is already completed in Supabase
           if (game.status === "completed") {
             setIsGameFinishedState(true)
-            toast({
-              title: "Game is already finished",
-              description: "This game has already been completed. You cannot play again.",
-            })
+            if (isInitialLoad) {
+              toast({
+                title: "Game is already finished",
+                description: "This game has already been completed. You cannot play again.",
+              })
+            }
+            return true // Game is finished, return true to stop polling
           }
         }
 
@@ -80,10 +102,13 @@ export function GameRoom({ gameId }: { gameId: string }) {
         const finished = isGameFinished(state)
         if (finished) {
           setIsGameFinishedState(true)
-          toast({
-            title: "Game is already finished",
-            description: "This game has already been completed. You cannot play again.",
-          })
+          if (isInitialLoad) {
+            toast({
+              title: "Game is already finished",
+              description: "This game has already been completed. You cannot play again.",
+            })
+          }
+          return true // Game is finished, return true to stop polling
         }
 
         // Check if player has deposited
@@ -109,20 +134,39 @@ export function GameRoom({ gameId }: { gameId: string }) {
         }
 
         setIsJoined(true)
+        return false // Game is not finished, continue polling
       } catch (error) {
         console.error("Error checking application state:", error)
-        toast({
-          title: "Error",
-          description: "Failed to check game state. Please try again.",
-          variant: "destructive",
-        })
+        if (isLoading) {
+          toast({
+            title: "Error",
+            description: "Failed to check game state. Please try again.",
+            variant: "destructive",
+          })
+        }
+        return false
       } finally {
-        setIsLoading(false)
+        if (isLoading) {
+          setIsLoading(false)
+        }
       }
     }
 
+    // Initial check
     checkApplicationState()
-  }, [gameId, activeAccount, toast, isPlayer1, gameResetKey]) // Add gameResetKey to dependencies
+
+    // Set up polling to check for game state updates every 5 seconds
+    const intervalId = setInterval(async () => {
+      // If the game is finished, stop polling
+      const isFinished = await checkApplicationState()
+      if (isFinished || isGameFinishedState) {
+        clearInterval(intervalId)
+      }
+    }, 5000)
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId)
+  }, [gameId, activeAccount, toast, isPlayer1, gameResetKey, isLoading, isGameFinishedState])
 
   // Join the game as player 1 if we're the creator
   useEffect(() => {
@@ -344,6 +388,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
                     isPlayer1={isPlayer1}
                     setGameState={handleGameStateUpdate}
                     appState={appState}
+                    setAppState={setAppState}
                   />
                 ) : (
                   <div className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg flex items-center gap-2">

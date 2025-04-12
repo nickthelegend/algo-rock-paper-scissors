@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConnectWallet } from "@/components/connect-wallet"
-import { AlertCircle, Loader2, Clock, CheckCircle, ArrowRight } from 'lucide-react'
+import { AlertCircle, Loader2, Clock, CheckCircle, Trophy } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@txnlab/use-wallet-react"
@@ -14,7 +14,6 @@ import { useToast } from "@/hooks/use-toast"
 import { insertGame, getAllGames, type Game } from "@/lib/supabase"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
 
 export default function Home() {
   const router = useRouter()
@@ -23,8 +22,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeGames, setActiveGames] = useState<Game[]>([])
   const [completedGames, setCompletedGames] = useState<Game[]>([])
-  const [gameIdInput, setGameIdInput] = useState("")
-  const [isJoining, setIsJoining] = useState(false)
   const { toast } = useToast()
 
   // Fetch games from Supabase
@@ -136,54 +133,10 @@ export default function Home() {
     router.push(`/game/${gameId}`)
   }
 
-  const handleJoinByGameId = () => {
-    if (!gameIdInput.trim()) {
-      toast({
-        title: "Game ID required",
-        description: "Please enter a valid Game ID to join.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsJoining(true)
-    
-    try {
-      // Validate that the input is a number
-      const gameId = parseInt(gameIdInput.trim())
-      if (isNaN(gameId)) {
-        throw new Error("Game ID must be a number")
-      }
-      
-      // Navigate to the game page
-      router.push(`/game/${gameId}`)
-    } catch (error) {
-      toast({
-        title: "Invalid Game ID",
-        description: "Please enter a valid numeric Game ID.",
-        variant: "destructive",
-      })
-      setIsJoining(false)
-    }
-  }
-
   // Function to truncate addresses for display
   const truncateAddress = (address: string) => {
     if (!address) return ""
     return `${address.slice(0, 4)}...${address.slice(-4)}`
-  }
-
-  // Function to get winner address based on game data
-  const getWinnerAddress = (game: Game): string => {
-    if (!game.winner) return "Unknown"
-
-    if (game.winner === "player1") {
-      return game.player1_address
-    } else if (game.winner === "player2") {
-      return game.player2_address || "Unknown"
-    } else {
-      return "Draw - No Winner"
-    }
   }
 
   return (
@@ -231,7 +184,7 @@ export default function Home() {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="flex flex-col gap-4">
+            <CardFooter>
               <Button onClick={handleCreateGame} className="w-full" disabled={!activeAccount || isCreating}>
                 {isCreating ? (
                   <>
@@ -242,30 +195,6 @@ export default function Home() {
                   "Create New Game"
                 )}
               </Button>
-              
-              {/* Join by Game ID section */}
-              <div className="w-full space-y-2">
-                <div className="text-sm font-medium">Or join with Game ID:</div>
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="Enter Game ID" 
-                    value={gameIdInput}
-                    onChange={(e) => setGameIdInput(e.target.value)}
-                    className="flex-grow"
-                  />
-                  <Button 
-                    onClick={handleJoinByGameId} 
-                    disabled={isJoining || !gameIdInput.trim()}
-                    size="icon"
-                  >
-                    {isJoining ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <ArrowRight className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
             </CardFooter>
           </Card>
 
@@ -360,9 +289,14 @@ export default function Home() {
                               )}
                             </div>
                             {game.winner && game.winner !== "draw" && (
-                              <div className="text-xs mt-1">
+                              <div className="text-xs mt-1 flex items-center gap-1">
+                                <Trophy className="h-3 w-3 text-green-500" />
                                 <span className="text-green-500 font-medium">Winner:</span>{" "}
-                                {truncateAddress(getWinnerAddress(game))}
+                                {game.winner_address
+                                  ? truncateAddress(game.winner_address)
+                                  : truncateAddress(
+                                      game.winner === "player1" ? game.player1_address : game.player2_address || "",
+                                    )}
                               </div>
                             )}
                             {game.winner === "draw" && (

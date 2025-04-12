@@ -10,18 +10,21 @@ import Image from "next/image"
 import { useWallet } from "@txnlab/use-wallet-react"
 import { getGameByAppId } from "@/lib/supabase"
 import { hasPlayerDeposited, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
+import { fetchApplicationState } from "@/lib/algorand"
 
 // Import the encryption functions at the top of the file
 import { encrypt, decrypt } from "@/lib/encryption"
 
+// Fix the props type to include setAppState
 type GameControlsProps = {
   gameId: string
   isPlayer1: boolean
   setGameState: React.Dispatch<React.SetStateAction<GameState | null>>
   appState?: any
+  setAppState?: React.Dispatch<React.SetStateAction<any>>
 }
 
-export function GameControls({ gameId, isPlayer1, setGameState, appState }: GameControlsProps) {
+export function GameControls({ gameId, isPlayer1, setGameState, appState, setAppState = () => {} }: GameControlsProps) {
   const [selectedChoice, setSelectedChoice] = useState<Choice>(null)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -31,20 +34,61 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
   const { activeAccount } = useWallet()
 
-  // Check if both players have deposited
-  useEffect(() => {
-    if (appState) {
-      const player1Deposited = hasPlayerDeposited(appState, PLAYER1_KEY)
-      const player2Deposited = hasPlayerDeposited(appState, PLAYER2_KEY)
+  // Update the useEffect that checks for opponent deposits to include polling
 
-      // Only show waiting message if the current player's opponent hasn't deposited yet
-      if (isPlayer1) {
-        setWaitingForOpponent(!player2Deposited)
-      } else {
-        setWaitingForOpponent(!player1Deposited)
+  // Replace the existing useEffect that checks if both players have deposited with this updated version
+  useEffect(() => {
+    // Function to check if both players have deposited
+    const checkDeposits = async () => {
+      if (appState) {
+        const player1Deposited = hasPlayerDeposited(appState, PLAYER1_KEY)
+        const player2Deposited = hasPlayerDeposited(appState, PLAYER2_KEY)
+
+        // Only show waiting message if the current player's opponent hasn't deposited yet
+        if (isPlayer1) {
+          setWaitingForOpponent(!player2Deposited)
+        } else {
+          setWaitingForOpponent(!player1Deposited)
+        }
       }
     }
-  }, [appState, isPlayer1])
+
+    // Initial check
+    checkDeposits()
+
+    // Set up polling to check for opponent deposits every 3 seconds
+    const intervalId = setInterval(async () => {
+      try {
+        // Fetch the latest application state from Algorand
+        const updatedAppState = await fetchApplicationState(Number(gameId))
+
+        // Update the local appState with the latest data
+        if (updatedAppState) {
+          setAppState(updatedAppState)
+
+          const player1Deposited = hasPlayerDeposited(updatedAppState, PLAYER1_KEY)
+          const player2Deposited = hasPlayerDeposited(updatedAppState, PLAYER2_KEY)
+
+          // Update waiting status based on latest data
+          if (isPlayer1) {
+            setWaitingForOpponent(!player2Deposited)
+          } else {
+            setWaitingForOpponent(!player1Deposited)
+          }
+
+          // If both players have deposited, we can stop polling
+          if (player1Deposited && player2Deposited) {
+            clearInterval(intervalId)
+          }
+        }
+      } catch (error) {
+        console.error("Error polling for opponent deposits:", error)
+      }
+    }, 3000) // Poll every 3 seconds
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId)
+  }, [appState, isPlayer1, gameId, setAppState])
 
   // Fetch game information to get player addresses
   useEffect(() => {
@@ -86,7 +130,7 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
   const handleChoiceSelection = async (choice: Choice) => {
     setSelectedChoice(choice)
     setIsSubmitting(true)
-    if (!choice){return}
+
     // Encrypt the choice
     try {
       const encryptedMoveName = await encrypt(choice)
@@ -122,14 +166,24 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
         // This avoids trying to decrypt potentially encrypted choices
         if (currentGameState.result) {
           setGameState(currentGameState)
+          // Stop polling once we have a result
+          return true
         }
+        return false
       } catch (error) {
         console.error("Error fetching game state:", error)
+        return false
       }
     }
 
     // Set up polling interval (every 2 seconds)
-    const intervalId = setInterval(fetchGameState, 2000)
+    const intervalId = setInterval(async () => {
+      const hasResult = await fetchGameState()
+      if (hasResult) {
+        // If we have a result, stop polling
+        clearInterval(intervalId)
+      }
+    }, 2000)
 
     // Clean up interval on unmount
     return () => clearInterval(intervalId)
