@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConnectWallet } from "@/components/connect-wallet"
-import { AlertCircle, Loader2, Clock, CheckCircle, Trophy } from "lucide-react"
+import { AlertCircle, Loader2, Clock, CheckCircle, Trophy, ArrowRight } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@txnlab/use-wallet-react"
@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { insertGame, getAllGames, type Game } from "@/lib/supabase"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
 
 export default function Home() {
   const router = useRouter()
@@ -22,6 +23,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
   const [activeGames, setActiveGames] = useState<Game[]>([])
   const [completedGames, setCompletedGames] = useState<Game[]>([])
+  const [gameIdInput, setGameIdInput] = useState("")
+  const [isJoining, setIsJoining] = useState(false)
   const { toast } = useToast()
 
   // Fetch games from Supabase
@@ -133,6 +136,33 @@ export default function Home() {
     router.push(`/game/${gameId}`)
   }
 
+  const handleJoinGameById = () => {
+    if (!gameIdInput.trim()) {
+      toast({
+        title: "Game ID required",
+        description: "Please enter a valid Game ID to join.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setIsJoining(true)
+      const gameId = Number.parseInt(gameIdInput.trim())
+      if (isNaN(gameId)) {
+        throw new Error("Invalid Game ID format")
+      }
+      router.push(`/game/${gameId}`)
+    } catch (error) {
+      toast({
+        title: "Invalid Game ID",
+        description: "Please enter a valid numeric Game ID.",
+        variant: "destructive",
+      })
+      setIsJoining(false)
+    }
+  }
+
   // Function to truncate addresses for display
   const truncateAddress = (address: string) => {
     if (!address) return ""
@@ -155,6 +185,11 @@ export default function Home() {
             Rock Paper Scissors
           </h1>
           <p className="text-muted-foreground mt-2">Challenge your friends to a blockchain-powered game!</p>
+          <div className="mt-2">
+            <Badge variant="outline" className="bg-primary/5 text-primary">
+              Running on Algorand Testnet
+            </Badge>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -184,7 +219,7 @@ export default function Home() {
                 </div>
               )}
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col gap-4">
               <Button onClick={handleCreateGame} className="w-full" disabled={!activeAccount || isCreating}>
                 {isCreating ? (
                   <>
@@ -195,6 +230,23 @@ export default function Home() {
                   "Create New Game"
                 )}
               </Button>
+
+              {/* Join Game by ID */}
+              <div className="w-full space-y-2">
+                <div className="text-sm font-medium">Join using Game ID:</div>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Enter Game ID"
+                    value={gameIdInput}
+                    onChange={(e) => setGameIdInput(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleJoinGameById} disabled={isJoining || !gameIdInput.trim()} size="icon">
+                    {isJoining ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
             </CardFooter>
           </Card>
 
