@@ -4,11 +4,11 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Wallet, Coins, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
+import { Wallet, Coins, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { useToast } from "@/hooks/use-toast"
 import { useWallet } from "@txnlab/use-wallet-react"
 import algosdk from "algosdk"
-import { getGameByAppId } from "@/lib/supabase"
+import { getGameByAppId, updateGameStatus } from "@/lib/supabase"
 import { fetchApplicationState, hasPlayerDeposited, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
 
 interface DepositFundsProps {
@@ -179,9 +179,25 @@ export function DepositFunds({ onDeposit, gameId, isPlayer1, player1Address }: D
         description: `${depositAmount} ALGOS has been added to your account.`,
       })
 
+      // If this is player 2 depositing, update the game status to notify player 1
+      if (!isPlayer1) {
+        // Update game status in Supabase to trigger a refresh for player 1
+        await updateGameStatus(gameId, "in_progress")
+        
+        // Send a message to player 1 to reload their page
+        // In a real app, you would use WebSockets or a similar technology
+        // For now, we'll just log it
+        console.log("Player 2 has deposited funds, notifying player 1")
+      }
+
       // Wait a moment before proceeding
       setTimeout(() => {
         onDeposit(depositAmount)
+        
+        // If player 2 just deposited, reload the page to update the UI for both players
+        if (!isPlayer1) {
+          window.location.reload()
+        }
       }, 2000)
     } catch (error) {
       console.error("Transaction error:", error)

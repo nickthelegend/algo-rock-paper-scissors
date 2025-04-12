@@ -31,6 +31,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
   const [player1Address, setPlayer1Address] = useState<string | null>(null)
   const [player2Address, setPlayer2Address] = useState<string | null>(null)
   const [isGameFinishedState, setIsGameFinishedState] = useState(false)
+  const [gameResetKey, setGameResetKey] = useState(0) // Add a key to force re-render
   const { toast } = useToast()
   const { activeAccount } = useWallet()
   const router = useRouter()
@@ -121,7 +122,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
     }
 
     checkApplicationState()
-  }, [gameId, activeAccount, toast, isPlayer1])
+  }, [gameId, activeAccount, toast, isPlayer1, gameResetKey]) // Add gameResetKey to dependencies
 
   // Join the game as player 1 if we're the creator
   useEffect(() => {
@@ -191,6 +192,21 @@ export function GameRoom({ gameId }: { gameId: string }) {
   // Function to create a new game
   const handleCreateNewGame = () => {
     router.push("/")
+  }
+
+  // Function to handle game reset
+  const handleGameReset = () => {
+    // Increment the reset key to force re-render of components
+    setGameResetKey((prev) => prev + 1)
+
+    // Reset the local game state
+    setGameState({
+      player1Choice: null,
+      player2Choice: null,
+      player1Connected: true,
+      player2Connected: true,
+      result: null,
+    })
   }
 
   if (isLoading) {
@@ -316,7 +332,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
 
             <AnimatePresence mode="wait">
               <motion.div
-                key="game-controls"
+                key={`game-controls-${gameResetKey}`} // Add key with gameResetKey to force re-render
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

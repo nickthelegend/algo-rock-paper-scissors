@@ -37,9 +37,14 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
       const player1Deposited = hasPlayerDeposited(appState, PLAYER1_KEY)
       const player2Deposited = hasPlayerDeposited(appState, PLAYER2_KEY)
 
-      setWaitingForOpponent(!player1Deposited || !player2Deposited)
+      // Only show waiting message if the current player's opponent hasn't deposited yet
+      if (isPlayer1) {
+        setWaitingForOpponent(!player2Deposited)
+      } else {
+        setWaitingForOpponent(!player1Deposited)
+      }
     }
-  }, [appState])
+  }, [appState, isPlayer1])
 
   // Fetch game information to get player addresses
   useEffect(() => {
@@ -146,7 +151,7 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
             transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
             className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg"
           >
-            <p>Both players need to deposit funds before the game can start.</p>
+            <p>{isPlayer1 ? "Player 2" : "Player 1"} needs to deposit funds before the game can start.</p>
             <p className="text-sm mt-2">Share the game link with your friend to join!</p>
           </motion.div>
         </div>

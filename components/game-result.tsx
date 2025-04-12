@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { type Choice, type GameState, resetGame } from "@/lib/actions"
-import { RotateCcw, AlertCircle, Trophy, Lock, Unlock } from "lucide-react"
+import { RotateCcw, AlertCircle, Trophy, Lock, Unlock } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import algosdk from "algosdk"
@@ -145,8 +145,8 @@ export function GameResult({
       if (result === "draw") {
         console.log("Game Result: It's a draw!")
 
-        // Update game status in Supabase
-        await updateGameStatus(Number(gameId), "completed", "draw")
+        // For draws, we don't mark the game as completed so players can play again
+        await updateGameStatus(Number(gameId), "in_progress", "draw")
       } else if (result === "player1") {
         console.log("Game Result: Player 1 won!")
         console.log(`Player 1 chose ${decryptedPlayer1Choice} and Player 2 chose ${decryptedPlayer2Choice}`)
@@ -320,9 +320,38 @@ export function GameResult({
 
     // Otherwise, reset the current game
     setIsResetting(true)
-    const updatedGameState = await resetGame(gameId)
-    setGameState(updatedGameState)
-    setIsResetting(false)
+    
+    try {
+      // Reset the game state on the server
+      const updatedGameState = await resetGame(gameId)
+      
+      // Update the local game state to allow players to make new choices
+      setGameState({
+        player1Choice: null,
+        player2Choice: null,
+        player1Connected: true,
+        player2Connected: true,
+        result: null
+      })
+      
+      // Show success message
+      toast({
+        title: "Game Reset",
+        description: "You can now make a new choice!",
+      })
+      
+      // Force reload the page to reset all UI states
+      window.location.reload()
+    } catch (error) {
+      console.error("Error resetting game:", error)
+      toast({
+        title: "Error",
+        description: "Failed to reset the game. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsResetting(false)
+    }
   }
 
   const getChoiceImage = (choice: Choice) => {
@@ -434,6 +463,7 @@ export function GameResult({
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <div className="text-sm">
               <p>The game ended in a draw!</p>
+              <p className="text-xs mt-1">Click "Play Again" to start a new round.</p>
             </div>
           </div>
         )}
@@ -454,8 +484,23 @@ export function GameResult({
         ) : null}
 
         <Button onClick={handleReset} className="w-full" disabled={isResetting}>
-          <RotateCcw className="h-4 w-4 mr-2" />
-          {isGameOver ? "Create New Game" : "Play Again"}
+          {isResetting ? (
+            <>
+              <motion.div
+                className="mr-2"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+              >
+                <RotateCcw className="h-4 w-4" />
+              </motion.div>
+              Resetting...
+            </>
+          ) : (
+            <>
+              <RotateCcw className="h-4 w-4 mr-2" />
+              {isGameOver ? "Create New Game" : "Play Again"}
+            </>
+          )}
         </Button>
       </motion.div>
     </AnimatePresence>

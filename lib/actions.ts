@@ -110,12 +110,22 @@ function determineWinner(player1Choice: Choice, player2Choice: Choice): "player1
 
 // Reset the game
 export async function resetGame(gameId: string): Promise<GameState> {
+  // Get the current game state or initialize a new one
   const game = games.get(gameId) || (await initializeGame(gameId))
-
-  game.player1Choice = null
-  game.player2Choice = null
-  game.result = null
-
-  games.set(gameId, game)
-  return game
+  
+  // Preserve the connection status but reset choices and result
+  const resetState: GameState = {
+    player1Choice: null,
+    player2Choice: null,
+    player1Connected: game.player1Connected,
+    player2Connected: game.player2Connected,
+    result: null,
+  }
+  
+  // Update the game state in the map
+  games.set(gameId, resetState)
+  
+  console.log("Game reset:", gameId, resetState)
+  
+  return resetState
 }
