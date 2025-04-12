@@ -1,23 +1,58 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConnectWallet } from "@/components/connect-wallet"
-import { Users, AlertCircle, Loader2 } from "lucide-react"
+import { AlertCircle, Loader2, Clock, CheckCircle, Trophy } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@txnlab/use-wallet-react"
 import { GameClient } from "@/contracts/GameClient"
 import algosdk from "algosdk"
 import { useToast } from "@/hooks/use-toast"
-import { insertGame } from "@/lib/supabase"
+import { insertGame, getAllGames, type Game } from "@/lib/supabase"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function Home() {
   const router = useRouter()
   const { activeAccount } = useWallet()
   const [isCreating, setIsCreating] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeGames, setActiveGames] = useState<Game[]>([])
+  const [completedGames, setCompletedGames] = useState<Game[]>([])
   const { toast } = useToast()
+
+  // Fetch games from Supabase
+  useEffect(() => {
+    async function fetchGames() {
+      try {
+        setIsLoading(true)
+        const games = await getAllGames()
+
+        if (games) {
+          // Filter active and completed games
+          const active = games.filter((game) => game.status !== "completed")
+          const completed = games.filter((game) => game.status === "completed")
+
+          setActiveGames(active)
+          setCompletedGames(completed)
+        }
+      } catch (error) {
+        console.error("Error fetching games:", error)
+        toast({
+          title: "Failed to load games",
+          description: "Could not retrieve game data from the database.",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchGames()
+  }, [toast])
 
   const handleCreateGame = async () => {
     if (!activeAccount) {
@@ -52,6 +87,7 @@ export default function Home() {
 
       // Create application
       await Caller.create.createApplication({
+        player1: activeAccount.address,
       })
 
       // Get application reference
@@ -93,64 +129,177 @@ export default function Home() {
     }
   }
 
+  const handleJoinGame = (gameId: number) => {
+    router.push(`/game/${gameId}`)
+  }
+
+  // Function to truncate addresses for display
+  const truncateAddress = (address: string) => {
+    if (!address) return ""
+    return `${address.slice(0, 4)}...${address.slice(-4)}`
+  }
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
+    <div className="flex min-h-screen flex-col items-center p-4 md:p-8">
       <div className="absolute top-4 right-4 flex items-center gap-4">
         <ConnectWallet />
         <ThemeToggle />
       </div>
 
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold flex items-center justify-center gap-2">
-            <div className="relative w-8 h-8">
-              <Image src="/rock.png" alt="Rock Paper Scissors" fill className="object-contain" sizes="32px" />
+      <div className="w-full max-w-4xl mx-auto mt-16">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
+            <div className="relative w-10 h-10">
+              <Image src="/rock.png" alt="Rock Paper Scissors" fill className="object-contain" sizes="40px" />
             </div>
             Rock Paper Scissors
-          </CardTitle>
-          <CardDescription>Challenge your friends to a game!</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center space-y-4">
-          <div className="relative w-full h-64 flex items-center justify-center">
-            <div className="flex items-center justify-center gap-4">
-              <div className="relative w-24 h-24">
-                <Image src="/rock.png" alt="Rock" fill className="object-contain" sizes="96px" />
-              </div>
-              <div className="relative w-24 h-24">
-                <Image src="/paper.png" alt="Paper" fill className="object-contain" sizes="96px" />
-              </div>
-              <div className="relative w-24 h-24">
-                <Image src="/scissors.png" alt="Scissors" fill className="object-contain" sizes="96px" />
-              </div>
-            </div>
-          </div>
+          </h1>
+          <p className="text-muted-foreground mt-2">Challenge your friends to a blockchain-powered game!</p>
+        </div>
 
-          {!activeAccount && (
-            <div className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg flex items-center gap-2 w-full">
-              <AlertCircle className="h-5 w-5 flex-shrink-0" />
-              <span>Please connect your wallet to create a game</span>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button onClick={handleCreateGame} className="w-full" size="lg" disabled={!activeAccount || isCreating}>
-            {isCreating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Creating Game...
-              </>
-            ) : (
-              "Create New Game"
-            )}
-          </Button>
-          <div className="flex items-center justify-center w-full">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Play with friends online</span>
-            </div>
-          </div>
-        </CardFooter>
-      </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Create Game Card */}
+          <Card className="md:col-span-1">
+            <CardHeader>
+              <CardTitle className="text-xl">Create New Game</CardTitle>
+              <CardDescription>Start a new challenge</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <div className="relative w-16 h-16">
+                  <Image src="/rock.png" alt="Rock" fill className="object-contain" sizes="64px" />
+                </div>
+                <div className="relative w-16 h-16">
+                  <Image src="/paper.png" alt="Paper" fill className="object-contain" sizes="64px" />
+                </div>
+                <div className="relative w-16 h-16">
+                  <Image src="/scissors.png" alt="Scissors" fill className="object-contain" sizes="64px" />
+                </div>
+              </div>
+
+              {!activeAccount && (
+                <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-lg flex items-center gap-2 w-full text-sm">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span>Please connect your wallet</span>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleCreateGame} className="w-full" disabled={!activeAccount || isCreating}>
+                {isCreating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating Game...
+                  </>
+                ) : (
+                  "Create New Game"
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+
+          {/* Games List Card */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-xl">Game Rooms</CardTitle>
+              <CardDescription>
+                {isLoading
+                  ? "Loading games..."
+                  : `${activeGames.length} active games, ${completedGames.length} completed games`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <Tabs defaultValue="active">
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="active" className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Active Games ({activeGames.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="completed" className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Completed Games ({completedGames.length})
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="active" className="space-y-4">
+                    {activeGames.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No active games found. Create a new game to get started!
+                      </div>
+                    ) : (
+                      activeGames.map((game) => (
+                        <div
+                          key={game.app_id}
+                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex flex-col">
+                            <div className="font-medium">Game #{game.app_id}</div>
+                            <div className="text-xs text-muted-foreground">
+                              Player 1: {truncateAddress(game.player1_address)}
+                              {game.player2_address ? ` • Player 2: ${truncateAddress(game.player2_address)}` : ""}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={game.player2_address ? "secondary" : "outline"}>
+                              {game.player2_address ? "In Progress" : "Waiting"}
+                            </Badge>
+                            <Button size="sm" onClick={() => handleJoinGame(game.app_id)}>
+                              {game.player2_address ? "View" : "Join"}
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="completed" className="space-y-4">
+                    {completedGames.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">No completed games yet.</div>
+                    ) : (
+                      completedGames.map((game) => (
+                        <div
+                          key={game.app_id}
+                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex flex-col">
+                            <div className="font-medium">Game #{game.app_id}</div>
+                            <div className="text-xs text-muted-foreground">
+                              Player 1: {truncateAddress(game.player1_address)}
+                              {game.player2_address ? ` • Player 2: ${truncateAddress(game.player2_address)}` : ""}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {game.winner && (
+                              <div className="flex items-center gap-1 text-sm">
+                                <Trophy className="h-4 w-4 text-yellow-500" />
+                                <span>
+                                  {game.winner === "player1"
+                                    ? "Player 1 Won"
+                                    : game.winner === "player2"
+                                      ? "Player 2 Won"
+                                      : "Draw"}
+                                </span>
+                              </div>
+                            )}
+                            <Button size="sm" variant="outline" onClick={() => handleJoinGame(game.app_id)}>
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </TabsContent>
+                </Tabs>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

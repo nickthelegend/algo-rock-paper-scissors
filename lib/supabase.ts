@@ -54,22 +54,17 @@ export async function getGameByAppId(appId: number): Promise<Game | null> {
 
 // Function to update game status to completed and set winner
 export async function updateGameStatus(
-  appId: number, 
-  status: "created" | "in_progress" | "completed", 
-  winner?: "player1" | "player2" | "draw"
+  appId: number,
+  status: "created" | "in_progress" | "completed",
+  winner?: "player1" | "player2" | "draw",
 ): Promise<Game | null> {
   try {
     const updateData: Partial<Game> = { status }
     if (winner) {
       updateData.winner = winner
     }
-    
-    const { data, error } = await supabase
-      .from("games")
-      .update(updateData)
-      .eq("app_id", appId)
-      .select()
-      .single()
+
+    const { data, error } = await supabase.from("games").update(updateData).eq("app_id", appId).select().single()
 
     if (error) {
       console.error("Error updating game status:", error)
@@ -79,6 +74,23 @@ export async function updateGameStatus(
     return data
   } catch (error) {
     console.error("Failed to update game status:", error)
+    return null
+  }
+}
+
+// Function to get all games
+export async function getAllGames(): Promise<Game[] | null> {
+  try {
+    const { data, error } = await supabase.from("games").select("*").order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("Error getting games:", error)
+      throw error
+    }
+
+    return data
+  } catch (error) {
+    console.error("Failed to get games:", error)
     return null
   }
 }
