@@ -8,6 +8,8 @@ A decentralized, trustless Rock-Paper-Scissors game built with ****Next.js**** a
 
 [Check Out The Live Website](https://rps.nickthelegend.tech/)
 
+https://github.com/user-attachments/assets/b4355629-4dcd-419d-9466-f0fd7f5a26fb
+
 ## 🧠 Smart Contract Overview
 
 **The core game logic is encapsulated within the **`Game`** smart contract, written using TealScript.** **This contract manages player interactions, move submissions, fund handling, and determines the game outcome.**
