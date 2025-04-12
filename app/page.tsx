@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConnectWallet } from "@/components/connect-wallet"
-import { AlertCircle, Loader2, Clock, CheckCircle, Trophy } from "lucide-react"
+import { AlertCircle, Loader2, Clock, CheckCircle } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@txnlab/use-wallet-react"
@@ -139,6 +139,19 @@ export default function Home() {
     return `${address.slice(0, 4)}...${address.slice(-4)}`
   }
 
+  // Function to get winner address based on game data
+  const getWinnerAddress = (game: Game): string => {
+    if (!game.winner) return "Unknown"
+
+    if (game.winner === "player1") {
+      return game.player1_address
+    } else if (game.winner === "player2") {
+      return game.player2_address || "Unknown"
+    } else {
+      return "Draw - No Winner"
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center p-4 md:p-8">
       <div className="absolute top-4 right-4 flex items-center gap-4">
@@ -240,8 +253,16 @@ export default function Home() {
                           <div className="flex flex-col">
                             <div className="font-medium">Game #{game.app_id}</div>
                             <div className="text-xs text-muted-foreground">
-                              Player 1: {truncateAddress(game.player1_address)}
-                              {game.player2_address ? ` • Player 2: ${truncateAddress(game.player2_address)}` : ""}
+                              <span className="text-primary font-medium">Creator:</span>{" "}
+                              {truncateAddress(game.player1_address)}
+                              {game.player2_address ? (
+                                <span className="ml-2">
+                                  <span className="text-primary font-medium">Opponent:</span>{" "}
+                                  {truncateAddress(game.player2_address)}
+                                </span>
+                              ) : (
+                                ""
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -269,23 +290,33 @@ export default function Home() {
                           <div className="flex flex-col">
                             <div className="font-medium">Game #{game.app_id}</div>
                             <div className="text-xs text-muted-foreground">
-                              Player 1: {truncateAddress(game.player1_address)}
-                              {game.player2_address ? ` • Player 2: ${truncateAddress(game.player2_address)}` : ""}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {game.winner && (
-                              <div className="flex items-center gap-1 text-sm">
-                                <Trophy className="h-4 w-4 text-yellow-500" />
-                                <span>
-                                  {game.winner === "player1"
-                                    ? "Player 1 Won"
-                                    : game.winner === "player2"
-                                      ? "Player 2 Won"
-                                      : "Draw"}
+                              <span className="text-primary font-medium">Creator:</span>{" "}
+                              {truncateAddress(game.player1_address)}
+                              {game.player2_address ? (
+                                <span className="ml-2">
+                                  <span className="text-primary font-medium">Opponent:</span>{" "}
+                                  {truncateAddress(game.player2_address)}
                                 </span>
+                              ) : (
+                                ""
+                              )}
+                            </div>
+                            {game.winner && game.winner !== "draw" && (
+                              <div className="text-xs mt-1">
+                                <span className="text-green-500 font-medium">Winner:</span>{" "}
+                                {truncateAddress(getWinnerAddress(game))}
                               </div>
                             )}
+                            {game.winner === "draw" && (
+                              <div className="text-xs mt-1">
+                                <span className="text-yellow-500 font-medium">Result:</span> Draw
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="bg-green-500/10 text-green-500 hover:bg-green-500/20">
+                              Completed
+                            </Badge>
                             <Button size="sm" variant="outline" onClick={() => handleJoinGame(game.app_id)}>
                               View
                             </Button>

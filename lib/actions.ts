@@ -1,6 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { encrypt, decrypt } from "./encryption"
 
 // Generate a random numeric ID for the game
 function generateGameId(): string {
@@ -18,8 +19,8 @@ export type Choice = "rock" | "paper" | "scissors" | null
 
 // Game state
 export type GameState = {
-  player1Choice: Choice
-  player2Choice: Choice
+  player1Choice: Choice | string | null // Can be encrypted string
+  player2Choice: Choice | string | null // Can be encrypted string
   player1Connected: boolean
   player2Connected: boolean
   result: "player1" | "player2" | "draw" | null
@@ -56,25 +57,37 @@ export async function joinGame(gameId: string, isPlayer1: boolean): Promise<Game
   return game
 }
 
-// Update the makeChoice function to handle null choice (used for polling)
+// Update the makeChoice function to handle null choice (used for polling) and encrypt choices
 export async function makeChoice(gameId: string, isPlayer1: boolean, choice: Choice): Promise<GameState> {
   const game = games.get(gameId) || (await initializeGame(gameId))
 
   // If choice is null, just return the current game state without making changes
   // This allows us to use this function for polling the current state
   if (choice !== null) {
-    if (isPlayer1) {
-      game.player1Choice = choice
-    } else {
-      game.player2Choice = choice
-    }
+    try {
+      // Encrypt the choice before storing it
+      const encryptedChoice = await encrypt(choice)
 
-    // Check if both players have made a choice
-    if (game.player1Choice && game.player2Choice) {
-      game.result = determineWinner(game.player1Choice, game.player2Choice)
-    }
+      if (isPlayer1) {
+        game.player1Choice = encryptedChoice
+      } else {
+        game.player2Choice = encryptedChoice
+      }
 
-    games.set(gameId, game)
+      // Check if both players have made a choice
+      if (game.player1Choice && game.player2Choice) {
+        // Decrypt choices for determining the winner
+        const decryptedPlayer1Choice = (await decrypt(game.player1Choice as string)) as Choice
+        const decryptedPlayer2Choice = (await decrypt(game.player2Choice as string)) as Choice
+
+        // Determine the winner using decrypted choices
+        game.result = determineWinner(decryptedPlayer1Choice, decryptedPlayer2Choice)
+      }
+
+      games.set(gameId, game)
+    } catch (error) {
+      console.error("Error encrypting/decrypting choice:", error)
+    }
   }
 
   return game

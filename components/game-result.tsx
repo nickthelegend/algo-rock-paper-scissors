@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { type Choice, type GameState, resetGame } from "@/lib/actions"
-import { RotateCcw, AlertCircle } from 'lucide-react'
+import { RotateCcw, AlertCircle, Trophy, Lock, Unlock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import algosdk from "algosdk"
@@ -14,11 +14,12 @@ import { useToast } from "@/hooks/use-toast"
 import { updateGameStatus } from "@/lib/supabase"
 import { fetchApplicationState, isGameFinished } from "@/lib/algorand"
 import { useRouter } from "next/navigation"
+import { decrypt } from "@/lib/encryption"
 
 type GameResultProps = {
   result: "player1" | "player2" | "draw" | null
-  player1Choice: Choice
-  player2Choice: Choice
+  player1Choice: Choice | string | null
+  player2Choice: Choice | string | null
   gameId: string
   isPlayer1: boolean
   setGameState: React.Dispatch<React.SetStateAction<GameState | null>>
@@ -53,8 +54,53 @@ export function GameResult({
 }: GameResultProps) {
   const [isResetting, setIsResetting] = useState(false)
   const [isGameOver, setIsGameOver] = useState(false)
+  const [winnerAddress, setWinnerAddress] = useState<string | null>(null)
+  const [decryptedPlayer1Choice, setDecryptedPlayer1Choice] = useState<Choice>(null)
+  const [decryptedPlayer2Choice, setDecryptedPlayer2Choice] = useState<Choice>(null)
+  const [isDecrypting, setIsDecrypting] = useState(true)
   const { toast } = useToast()
   const router = useRouter()
+
+  // Decrypt the choices when component mounts
+  useEffect(() => {
+    async function decryptChoices() {
+      setIsDecrypting(true)
+      try {
+        // Check if choices are encrypted strings
+        if (
+          typeof player1Choice === "string" &&
+          player1Choice !== "rock" &&
+          player1Choice !== "paper" &&
+          player1Choice !== "scissors"
+        ) {
+          const decrypted1 = (await decrypt(player1Choice)) as Choice
+          setDecryptedPlayer1Choice(decrypted1)
+        } else {
+          setDecryptedPlayer1Choice(player1Choice as Choice)
+        }
+
+        if (
+          typeof player2Choice === "string" &&
+          player2Choice !== "rock" &&
+          player2Choice !== "paper" &&
+          player2Choice !== "scissors"
+        ) {
+          const decrypted2 = (await decrypt(player2Choice)) as Choice
+          setDecryptedPlayer2Choice(decrypted2)
+        } else {
+          setDecryptedPlayer2Choice(player2Choice as Choice)
+        }
+      } catch (error) {
+        console.error("Error decrypting choices:", error)
+      } finally {
+        setIsDecrypting(false)
+      }
+    }
+
+    if (player1Choice && player2Choice) {
+      decryptChoices()
+    }
+  }, [player1Choice, player2Choice])
 
   // Check if the game is already finished
   useEffect(() => {
@@ -63,7 +109,7 @@ export function GameResult({
         const appState = await fetchApplicationState(Number(gameId))
         const finished = isGameFinished(appState)
         setIsGameOver(finished)
-        
+
         if (finished) {
           toast({
             title: "Game is already finished",
@@ -74,26 +120,36 @@ export function GameResult({
         console.error("Error checking game status:", error)
       }
     }
-    
+
     checkGameStatus()
   }, [gameId, toast])
+
+  // Set winner address based on result
+  useEffect(() => {
+    if (result === "player1" && player1Address) {
+      setWinnerAddress(player1Address)
+    } else if (result === "player2" && player2Address) {
+      setWinnerAddress(player2Address)
+    } else {
+      setWinnerAddress(null)
+    }
+  }, [result, player1Address, player2Address])
 
   useEffect(() => {
     // Define an async function inside useEffect
     const processGameResult = async () => {
       // Skip if the game is already over
       if (isGameOver) return
-      
+
       // Log the winner to the console
       if (result === "draw") {
         console.log("Game Result: It's a draw!")
-        
+
         // Update game status in Supabase
         await updateGameStatus(Number(gameId), "completed", "draw")
-        
       } else if (result === "player1") {
         console.log("Game Result: Player 1 won!")
-        console.log(`Player 1 chose ${player1Choice} and Player 2 chose ${player2Choice}`)
+        console.log(`Player 1 chose ${decryptedPlayer1Choice} and Player 2 chose ${decryptedPlayer2Choice}`)
 
         // Update game status in Supabase
         await updateGameStatus(Number(gameId), "completed", "player1")
@@ -110,7 +166,7 @@ export function GameResult({
             )
 
             const atc = new algosdk.AtomicTransactionComposer()
-            
+
             // Set winner in the smart contract
             atc.addMethodCall({
               appID: Number(gameId),
@@ -119,9 +175,9 @@ export function GameResult({
               methodArgs: [player1Address],
               sender: admin.addr,
               suggestedParams: { ...suggestedParams, fee: Number(30) },
-              appAccounts: [player1Address]
+              appAccounts: [player1Address],
             })
-            
+
             // Send funds to winner
             atc.addMethodCall({
               appID: Number(gameId),
@@ -130,7 +186,7 @@ export function GameResult({
               methodArgs: [player1Address],
               sender: admin.addr,
               suggestedParams: { ...suggestedParams, fee: Number(30) },
-              appAccounts: [player1Address]
+              appAccounts: [player1Address],
             })
 
             // Execute the transaction
@@ -144,10 +200,9 @@ export function GameResult({
               title: "Funds sent to winner",
               description: "The prize has been sent to Player 1's wallet",
             })
-            
+
             // Mark the game as over
             setIsGameOver(true)
-            
           } catch (error) {
             console.error("Error sending funds to winner:", error)
             toast({
@@ -159,8 +214,8 @@ export function GameResult({
         }
       } else if (result === "player2") {
         console.log("Game Result: Player 2 won!")
-        console.log(`Player 1 chose ${player1Choice} and Player 2 chose ${player2Choice}`)
-        
+        console.log(`Player 1 chose ${decryptedPlayer1Choice} and Player 2 chose ${decryptedPlayer2Choice}`)
+
         // Update game status in Supabase
         await updateGameStatus(Number(gameId), "completed", "player2")
 
@@ -189,9 +244,9 @@ export function GameResult({
               methodArgs: [player2Address],
               sender: admin.addr,
               suggestedParams: { ...suggestedParams, fee: Number(30) },
-              appAccounts: [player2Address]
+              appAccounts: [player2Address],
             })
-            
+
             // Send funds to winner
             atc.addMethodCall({
               appID: Number(gameId),
@@ -200,7 +255,7 @@ export function GameResult({
               methodArgs: [player2Address],
               sender: admin.addr,
               suggestedParams: { ...suggestedParams, fee: Number(30) },
-              appAccounts: [player2Address]
+              appAccounts: [player2Address],
             })
 
             // Execute the transaction
@@ -214,10 +269,9 @@ export function GameResult({
               title: "Funds sent to winner",
               description: "The prize has been sent to Player 2's wallet",
             })
-            
+
             // Mark the game as over
             setIsGameOver(true)
-            
           } catch (error) {
             console.error("Error sending funds to winner:", error)
             toast({
@@ -234,25 +288,36 @@ export function GameResult({
 
       // Log the winning combination
       if (result !== "draw" && result !== null) {
-        const winnerChoice = result === "player1" ? player1Choice : player2Choice
-        const loserChoice = result === "player1" ? player2Choice : player1Choice
+        const winnerChoice = result === "player1" ? decryptedPlayer1Choice : decryptedPlayer2Choice
+        const loserChoice = result === "player1" ? decryptedPlayer2Choice : decryptedPlayer1Choice
         console.log(`Winning combination: ${winnerChoice} beats ${loserChoice}`)
       }
     }
 
     // Call the async function
-    if (result) {
+    if (result && !isDecrypting) {
       processGameResult()
     }
-  }, [result, player1Choice, player2Choice, isPlayer1, player1Address, player2Address, gameId, toast, isGameOver])
+  }, [
+    result,
+    decryptedPlayer1Choice,
+    decryptedPlayer2Choice,
+    isPlayer1,
+    player1Address,
+    player2Address,
+    gameId,
+    toast,
+    isGameOver,
+    isDecrypting,
+  ])
 
   const handleReset = async () => {
     // If the game is over, redirect to home to create a new game
     if (isGameOver) {
-      router.push('/')
+      router.push("/")
       return
     }
-    
+
     // Otherwise, reset the current game
     setIsResetting(true)
     const updatedGameState = await resetGame(gameId)
@@ -284,6 +349,31 @@ export function GameResult({
     return youWon ? "bg-green-500" : "bg-red-500"
   }
 
+  // Function to truncate addresses for display
+  const truncateAddress = (address: string) => {
+    if (!address) return ""
+    return `${address.slice(0, 6)}...${address.slice(-6)}`
+  }
+
+  if (isDecrypting) {
+    return (
+      <div className="w-full space-y-6 p-4 rounded-lg border">
+        <div className="text-center">
+          <Badge className="bg-blue-500">Decrypting Moves</Badge>
+        </div>
+        <div className="flex justify-center py-4">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          >
+            <Lock className="h-8 w-8 text-primary" />
+          </motion.div>
+        </div>
+        <div className="text-center text-sm text-muted-foreground">Decrypting player moves for secure gameplay...</div>
+      </div>
+    )
+  }
+
   return (
     <AnimatePresence>
       <motion.div
@@ -304,9 +394,12 @@ export function GameResult({
               animate={{ rotateY: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              {getChoiceImage(player1Choice)}
+              {getChoiceImage(decryptedPlayer1Choice)}
             </motion.div>
-            <div className="text-xs capitalize">{player1Choice}</div>
+            <div className="flex items-center gap-1 text-xs">
+              <span className="capitalize">{decryptedPlayer1Choice}</span>
+              <Unlock className="h-3 w-3 text-green-500" />
+            </div>
           </div>
 
           <div className="flex flex-col items-center space-y-2">
@@ -316,18 +409,47 @@ export function GameResult({
               animate={{ rotateY: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              {getChoiceImage(player2Choice)}
+              {getChoiceImage(decryptedPlayer2Choice)}
             </motion.div>
-            <div className="text-xs capitalize">{player2Choice}</div>
+            <div className="flex items-center gap-1 text-xs">
+              <span className="capitalize">{decryptedPlayer2Choice}</span>
+              <Unlock className="h-3 w-3 text-green-500" />
+            </div>
+          </div>
+        </div>
+
+        {/* Winner information */}
+        {result !== "draw" && winnerAddress && (
+          <div className="bg-green-500/10 text-green-500 p-3 rounded-lg flex items-center gap-2">
+            <Trophy className="h-4 w-4 flex-shrink-0" />
+            <div className="text-sm">
+              <p>Winner: {result === "player1" ? "Player 1" : "Player 2"}</p>
+              <p className="text-xs mt-1">Address: {truncateAddress(winnerAddress)}</p>
+            </div>
+          </div>
+        )}
+
+        {result === "draw" && (
+          <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-lg flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <div className="text-sm">
+              <p>The game ended in a draw!</p>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-blue-500/10 text-blue-500 p-3 rounded-lg flex items-center gap-2">
+          <Lock className="h-4 w-4 flex-shrink-0" />
+          <div className="text-sm">
+            <p>Your moves were encrypted during gameplay for privacy.</p>
+            <p className="text-xs mt-1">They are only decrypted when both players have made their choices.</p>
           </div>
         </div>
 
         {isGameOver ? (
           <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-lg flex items-center gap-2 mb-4">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
-            <div className="text-sm">
-              This game is completed. You cannot play again with this game ID.
-            </div>
+            <div className="text-sm">This game is completed. You cannot play again with this game ID.</div>
           </div>
         ) : null}
 

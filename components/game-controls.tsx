@@ -81,9 +81,7 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
   const handleChoiceSelection = async (choice: Choice) => {
     setSelectedChoice(choice)
     setIsSubmitting(true)
-    if(!choice){
-      return
-    }
+    if (!choice){return}
     // Encrypt the choice
     try {
       const encryptedMoveName = await encrypt(choice)
@@ -115,8 +113,9 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
         // without actually making a choice
         const currentGameState = await makeChoice(gameId, isPlayer1, null)
 
-        // Only update the game state if both players have made choices
-        if (currentGameState.player1Choice && currentGameState.player2Choice) {
+        // Check if both players have made choices by checking if result is set
+        // This avoids trying to decrypt potentially encrypted choices
+        if (currentGameState.result) {
           setGameState(currentGameState)
         }
       } catch (error) {
@@ -201,7 +200,9 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
           animate={{ opacity: 1 }}
           className="text-center text-sm text-muted-foreground"
         >
-          You chose {selectedChoice}. Waiting for your opponent to make their choice...
+          <p>You chose {selectedChoice}.</p>
+          <p className="text-xs mt-1 text-green-500">Your move has been encrypted for privacy.</p>
+          <p className="text-sm mt-2">Waiting for your opponent to make their choice...</p>
         </motion.div>
       )}
     </div>
