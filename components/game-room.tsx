@@ -28,6 +28,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
   const [isLoading, setIsLoading] = useState(true)
   const [appState, setAppState] = useState<any>(null)
   const [player1Address, setPlayer1Address] = useState<string | null>(null)
+  const [player2Address, setPlayer2Address] = useState<string | null>(null)
   const { toast } = useToast()
   const { activeAccount } = useWallet()
 
@@ -43,9 +44,19 @@ export function GameRoom({ gameId }: { gameId: string }) {
         const game = await getGameByAppId(Number(gameId))
         if (game) {
           setPlayer1Address(game.player1_address)
+          if (game.player2_address) {
+            setPlayer2Address(game.player2_address)
+          }
+
           // Determine if current user is player1
           const currentIsPlayer1 = activeAccount.address === game.player1_address
           setIsPlayer1(currentIsPlayer1)
+
+          // If player2 is not set and this is not player1, update player2 address
+          if (!game.player2_address && !currentIsPlayer1) {
+            // In a real app, you would update the database here
+            setPlayer2Address(activeAccount.address)
+          }
         }
 
         // Fetch application state from Algorand
@@ -265,6 +276,8 @@ export function GameRoom({ gameId }: { gameId: string }) {
                 gameId={gameId}
                 isPlayer1={isPlayer1}
                 setGameState={setGameState}
+                player1Address={player1Address}
+                player2Address={player2Address}
               />
             )}
           </CardContent>

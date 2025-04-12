@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import algosdk from "algosdk"
 import { useToast } from "@/hooks/use-toast"
-import { access } from "fs"
 
 type GameResultProps = {
   result: "player1" | "player2" | "draw" | null
@@ -20,88 +19,182 @@ type GameResultProps = {
   gameId: string
   isPlayer1: boolean
   setGameState: React.Dispatch<React.SetStateAction<GameState | null>>
+  player1Address?: string | null
+  player2Address?: string | null
 }
 
-
 const METHODS = [
-  
-  new algosdk.ABIMethod({ name: "createBox", desc: "", args: [], returns: { type: "void", desc: "" } }),
-  new algosdk.ABIMethod({ name: "player1turn", desc: "", args: [{ type: "string", name: "move", desc: "" }], returns: { type: "void", desc: "" } }),
-  new algosdk.ABIMethod({ name: "player2turn", desc: "", args: [{ type: "string", name: "move", desc: "" }], returns: { type: "void", desc: "" } }),
+  new algosdk.ABIMethod({
+    name: "sendFunds",
+    desc: "",
+    args: [{ type: "address", name: "player", desc: "" }],
+    returns: { type: "void", desc: "" },
+  }),
+  new algosdk.ABIMethod({
+    name: "setWinner",
+    desc: "",
+    args: [{ type: "address", name: "winner", desc: "" }],
+    returns: { type: "void", desc: "" },
+  }),
+]
 
-];
-export async function GameResult({ result, player1Choice, player2Choice, gameId, isPlayer1, setGameState }: GameResultProps) {
+export function GameResult({
+  result,
+  player1Choice,
+  player2Choice,
+  gameId,
+  isPlayer1,
+  setGameState,
+  player1Address,
+  player2Address,
+}: GameResultProps) {
   const [isResetting, setIsResetting] = useState(false)
   const { toast } = useToast()
-  const algodClient = new algosdk.Algodv2(
-    "", // No token needed for PureStake
-    "https://testnet-api.algonode.cloud",
-    "",
-  )
-  const suggestedParams = await algodClient.getTransactionParams().do()
 
- 
-  
   useEffect(() => {
-    // Log the winner to the console
-    if (result === "draw") {
-      console.log("Game Result: It's a draw!")
-    } else if (result === "player1") {
-      console.log("Game Result: Player 1 won!")
+    // Define an async function inside useEffect
+    const processGameResult = async () => {
+      // Log the winner to the console
+      if (result === "draw") {
+        console.log("Game Result: It's a draw!")
+      } else if (result === "player1") {
+        console.log("Game Result: Player 1 won!")
+        console.log(`Player 1 chose ${player1Choice} and Player 2 chose ${player2Choice}`)
+
+        if (player1Address) {
+          try {
+            // Initialize Algorand client
+            const algodClient = new algosdk.Algodv2("", "https://testnet-api.algonode.cloud", "")
+            const suggestedParams = await algodClient.getTransactionParams().do()
+
+            // Initialize admin account from mnemonic
+            const admin = algosdk.mnemonicToSecretKey(
+              "certain prevent choose close sail exile predict penalty hip silver syrup amount maximum domain income liquid evoke hockey thunder twenty labor play proud absent birth",
+            )
+
+            const atc = new algosdk.AtomicTransactionComposer()
+            atc.addMethodCall({
+              appID: Number(gameId),
+              method: METHODS[1], // sendFunds method
+              signer: algosdk.makeBasicAccountTransactionSigner(admin),
+              methodArgs: [player1Address],
+              sender: admin.addr,
+              suggestedParams: { ...suggestedParams, fee: Number(30) },
+              appAccounts:[player1Address]
+            })
+            // Add method call to send funds to winner
+            atc.addMethodCall({
+              appID: Number(gameId),
+              method: METHODS[0], // sendFunds method
+              signer: algosdk.makeBasicAccountTransactionSigner(admin),
+              methodArgs: [player1Address],
+              sender: admin.addr,
+              suggestedParams: { ...suggestedParams, fee: Number(30) },
+              appAccounts:[player1Address]
+            })
+
+            // Execute the transaction
+            const txResult = await atc.execute(algodClient, 4)
+            for (const mr of txResult.methodResults) {
+              console.log(`${mr.returnValue}`)
+            }
+
+            console.log(`Winner's wallet address: ${player1Address}`)
+            toast({
+              title: "Funds sent to winner",
+              description: "The prize has been sent to Player 1's wallet",
+            })
+          } catch (error) {
+            console.error("Error sending funds to winner:", error)
+            toast({
+              title: "Error sending funds",
+              description: "There was an error sending funds to the winner",
+              variant: "destructive",
+            })
+          }
+        }
+      } else if (result === "player2") {
+        console.log("Game Result: Player 2 won!")
+        console.log(`Player 1 chose ${player1Choice} and Player 2 chose ${player2Choice}`)
+
+        if (player2Address) {
+          try {
+            // Initialize Algorand client
+            const algodClient = new algosdk.Algodv2(
+              "", // No token needed for PureStake
+              "https://testnet-api.algonode.cloud",
+              "",
+            )
+                        const suggestedParams = await algodClient.getTransactionParams().do()
+
+            // Initialize admin account from mnemonic
+            const admin = algosdk.mnemonicToSecretKey(
+              "certain prevent choose close sail exile predict penalty hip silver syrup amount maximum domain income liquid evoke hockey thunder twenty labor play proud absent birth",
+            )
+
+            const atc = new algosdk.AtomicTransactionComposer()
 
 
-      const admin = algosdk.mnemonicToSecretKey(
-        "certain prevent choose close sail exile predict penalty hip silver syrup amount maximum domain income liquid evoke hockey thunder twenty labor play proud absent birth",
-      )
 
-      const atc = new algosdk.AtomicTransactionComposer();
-      const boxKey = algosdk.coerceToBytes('player1Move');
-    
-      
-      atc.addMethodCall({
-        appID: Number(gameId),
-        method: METHODS[1], // your ABI method (buyNFT)
-        signer: algosdk.makeBasicAccountTransactionSigner(account),
-        methodArgs: [player2], 
-        sender: admin.addr,
-        suggestedParams: { ...suggestedParams, fee: Number(30) },
-        boxes:[{
-          appIndex: Number(gameId),
-          name: boxKey,
-        },]
-      });
-    
-      const result = await atc.execute(algodClient, 4);
-      for (const mr of result.methodResults) {
-        console.log(`${mr.returnValue}`);
+            atc.addMethodCall({
+              appID: Number(gameId),
+              method: METHODS[1], // sendFunds method
+              signer: algosdk.makeBasicAccountTransactionSigner(admin),
+              methodArgs: [player2Address],
+              sender: admin.addr,
+              suggestedParams: { ...suggestedParams, fee: Number(30) },
+              appAccounts:[player2Address]
+            })
+            // Add method call to send funds to winner
+            atc.addMethodCall({
+              appID: Number(gameId),
+              method: METHODS[0], // sendFunds method
+              signer: algosdk.makeBasicAccountTransactionSigner(admin),
+              methodArgs: [player2Address],
+              sender: admin.addr,
+              suggestedParams: { ...suggestedParams, fee: Number(30) },
+              appAccounts:[player2Address]
+
+            })
+
+            // Execute the transaction
+            const txResult = await atc.execute(algodClient, 4)
+            for (const mr of txResult.methodResults) {
+              console.log(`${mr.returnValue}`)
+            }
+
+            console.log(`Winner's wallet address: ${player2Address}`)
+            toast({
+              title: "Funds sent to winner",
+              description: "The prize has been sent to Player 2's wallet",
+            })
+          } catch (error) {
+            console.error("Error sending funds to winner:", error)
+            toast({
+              title: "Error sending funds",
+              description: "There was an error sending funds to the winner",
+              variant: "destructive",
+            })
+          }
+        }
       }
 
+      // Log additional information about the current player
+      console.log(`You are ${isPlayer1 ? "Player 1" : "Player 2"}`)
 
-
-
-
-
-
-
-
-
-
-      console.log(`Player 1 chose ${player1Choice} and Player 2 chose ${player2Choice}`)
-    } else if (result === "player2") {
-      console.log("Game Result: Player 2 won!")
-      console.log(`Player 1 chose ${player1Choice} and Player 2 chose ${player2Choice}`)
+      // Log the winning combination
+      if (result !== "draw" && result !== null) {
+        const winnerChoice = result === "player1" ? player1Choice : player2Choice
+        const loserChoice = result === "player1" ? player2Choice : player1Choice
+        console.log(`Winning combination: ${winnerChoice} beats ${loserChoice}`)
+      }
     }
 
-    // Log additional information about the current player
-    console.log(`You are ${isPlayer1 ? "Player 1" : "Player 2"}`)
-
-    // Log the winning combination
-    if (result !== "draw" && result !== null) {
-      const winnerChoice = result === "player1" ? player1Choice : player2Choice
-      const loserChoice = result === "player1" ? player2Choice : player1Choice
-      console.log(`Winning combination: ${winnerChoice} beats ${loserChoice}`)
+    // Call the async function
+    if (result) {
+      processGameResult()
     }
-  }, [result, player1Choice, player2Choice, isPlayer1])
+  }, [result, player1Choice, player2Choice, isPlayer1, player1Address, player2Address, gameId, toast])
 
   const handleReset = async () => {
     setIsResetting(true)
