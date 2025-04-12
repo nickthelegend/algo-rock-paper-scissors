@@ -56,22 +56,27 @@ export async function joinGame(gameId: string, isPlayer1: boolean): Promise<Game
   return game
 }
 
-// Make a choice
+// Update the makeChoice function to handle null choice (used for polling)
 export async function makeChoice(gameId: string, isPlayer1: boolean, choice: Choice): Promise<GameState> {
   const game = games.get(gameId) || (await initializeGame(gameId))
 
-  if (isPlayer1) {
-    game.player1Choice = choice
-  } else {
-    game.player2Choice = choice
+  // If choice is null, just return the current game state without making changes
+  // This allows us to use this function for polling the current state
+  if (choice !== null) {
+    if (isPlayer1) {
+      game.player1Choice = choice
+    } else {
+      game.player2Choice = choice
+    }
+
+    // Check if both players have made a choice
+    if (game.player1Choice && game.player2Choice) {
+      game.result = determineWinner(game.player1Choice, game.player2Choice)
+    }
+
+    games.set(gameId, game)
   }
 
-  // Check if both players have made a choice
-  if (game.player1Choice && game.player2Choice) {
-    game.result = determineWinner(game.player1Choice, game.player2Choice)
-  }
-
-  games.set(gameId, game)
   return game
 }
 

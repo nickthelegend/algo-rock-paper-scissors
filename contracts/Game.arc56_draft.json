@@ -1,0 +1,2197 @@
+{
+  "name": "Game",
+  "desc": "",
+  "methods": [
+    {
+      "name": "createApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [
+          "NoOp"
+        ],
+        "call": []
+      }
+    },
+    {
+      "name": "createBox",
+      "args": [],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "depositfundsPlayer1",
+      "args": [
+        {
+          "name": "ftransx",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "depositfundsPlayer2",
+      "args": [
+        {
+          "name": "ftransx",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "sendFunds",
+      "args": [
+        {
+          "name": "player",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "joinGame",
+      "args": [
+        {
+          "name": "player",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "player1turn",
+      "args": [
+        {
+          "name": "move",
+          "type": "string"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    },
+    {
+      "name": "player2turn",
+      "args": [
+        {
+          "name": "move",
+          "type": "string"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      },
+      "actions": {
+        "create": [],
+        "call": [
+          "NoOp"
+        ]
+      }
+    }
+  ],
+  "arcs": [
+    4,
+    56
+  ],
+  "structs": {},
+  "state": {
+    "schema": {
+      "global": {
+        "bytes": 4,
+        "ints": 4
+      },
+      "local": {
+        "bytes": 0,
+        "ints": 0
+      }
+    },
+    "keys": {
+      "global": {
+        "player1": {
+          "key": "cGxheWVyMQ==",
+          "keyType": "AVMBytes",
+          "valueType": "address"
+        },
+        "player2": {
+          "key": "cGxheWVyMg==",
+          "keyType": "AVMBytes",
+          "valueType": "address"
+        },
+        "depositedAmount": {
+          "key": "ZGVwb3NpdGVkQW1vdW50",
+          "keyType": "AVMBytes",
+          "valueType": "uint64"
+        },
+        "maxDepositAmount": {
+          "key": "bWF4RGVwb3NpdEFtb3VudA==",
+          "keyType": "AVMBytes",
+          "valueType": "uint64"
+        },
+        "winner": {
+          "key": "d2lubmVy",
+          "keyType": "AVMBytes",
+          "valueType": "address"
+        },
+        "player1Chances": {
+          "key": "cGxheWVyMUNoYW5jZXM=",
+          "keyType": "AVMBytes",
+          "valueType": "uint64"
+        },
+        "player2Chances": {
+          "key": "cGxheWVyMkNoYW5jZXM=",
+          "keyType": "AVMBytes",
+          "valueType": "uint64"
+        },
+        "status": {
+          "key": "c3RhdHVz",
+          "keyType": "AVMBytes",
+          "valueType": "string"
+        }
+      },
+      "local": {},
+      "box": {
+        "player1Move": {
+          "key": "cGxheWVyMU1vdmU=",
+          "keyType": "AVMBytes",
+          "valueType": "string"
+        },
+        "player2Move": {
+          "key": "cGxheWVyMk1vdmU=",
+          "keyType": "AVMBytes",
+          "valueType": "string"
+        }
+      }
+    },
+    "maps": {
+      "global": {},
+      "local": {},
+      "box": {}
+    }
+  },
+  "bareActions": {
+    "create": [],
+    "call": []
+  },
+  "sourceInfo": {
+    "approval": {
+      "sourceInfo": [
+        {
+          "teal": 1,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            0
+          ]
+        },
+        {
+          "teal": 2,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        },
+        {
+          "teal": 3,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95
+          ]
+        },
+        {
+          "teal": 15,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            96,
+            97
+          ]
+        },
+        {
+          "teal": 16,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            98
+          ]
+        },
+        {
+          "teal": 17,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            99,
+            100
+          ]
+        },
+        {
+          "teal": 18,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            101
+          ]
+        },
+        {
+          "teal": 19,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            102,
+            103
+          ]
+        },
+        {
+          "teal": 20,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            104
+          ]
+        },
+        {
+          "teal": 21,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130
+          ]
+        },
+        {
+          "teal": 25,
+          "source": "contracts/Game.algo.ts:4",
+          "errorMessage": "The requested action is not implemented in this contract. Are you using the correct OnComplete? Did you set your app ID?",
+          "pc": [
+            131
+          ]
+        },
+        {
+          "teal": 30,
+          "source": "contracts/Game.algo.ts:20",
+          "pc": [
+            132,
+            133,
+            134
+          ]
+        },
+        {
+          "teal": 31,
+          "source": "contracts/Game.algo.ts:20",
+          "pc": [
+            135
+          ]
+        },
+        {
+          "teal": 32,
+          "source": "contracts/Game.algo.ts:20",
+          "pc": [
+            136
+          ]
+        },
+        {
+          "teal": 36,
+          "source": "contracts/Game.algo.ts:20",
+          "pc": [
+            137,
+            138,
+            139
+          ]
+        },
+        {
+          "teal": 40,
+          "source": "contracts/Game.algo.ts:23",
+          "pc": [
+            140
+          ]
+        },
+        {
+          "teal": 41,
+          "source": "contracts/Game.algo.ts:23",
+          "pc": [
+            141
+          ]
+        },
+        {
+          "teal": 42,
+          "source": "contracts/Game.algo.ts:23",
+          "pc": [
+            142
+          ]
+        },
+        {
+          "teal": 46,
+          "source": "contracts/Game.algo.ts:24",
+          "pc": [
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160
+          ]
+        },
+        {
+          "teal": 47,
+          "source": "contracts/Game.algo.ts:24",
+          "pc": [
+            161,
+            162
+          ]
+        },
+        {
+          "teal": 48,
+          "source": "contracts/Game.algo.ts:24",
+          "pc": [
+            163
+          ]
+        },
+        {
+          "teal": 49,
+          "source": "contracts/Game.algo.ts:20",
+          "pc": [
+            164
+          ]
+        },
+        {
+          "teal": 54,
+          "source": "contracts/Game.algo.ts:28",
+          "pc": [
+            165,
+            166,
+            167
+          ]
+        },
+        {
+          "teal": 55,
+          "source": "contracts/Game.algo.ts:28",
+          "pc": [
+            168
+          ]
+        },
+        {
+          "teal": 56,
+          "source": "contracts/Game.algo.ts:28",
+          "pc": [
+            169
+          ]
+        },
+        {
+          "teal": 60,
+          "source": "contracts/Game.algo.ts:28",
+          "pc": [
+            170,
+            171,
+            172
+          ]
+        },
+        {
+          "teal": 64,
+          "source": "contracts/Game.algo.ts:29",
+          "pc": [
+            173
+          ]
+        },
+        {
+          "teal": 65,
+          "source": "contracts/Game.algo.ts:29",
+          "pc": [
+            174
+          ]
+        },
+        {
+          "teal": 66,
+          "source": "contracts/Game.algo.ts:29",
+          "pc": [
+            175
+          ]
+        },
+        {
+          "teal": 67,
+          "source": "contracts/Game.algo.ts:29",
+          "pc": [
+            176
+          ]
+        },
+        {
+          "teal": 71,
+          "source": "contracts/Game.algo.ts:30",
+          "pc": [
+            177
+          ]
+        },
+        {
+          "teal": 72,
+          "source": "contracts/Game.algo.ts:30",
+          "pc": [
+            178
+          ]
+        },
+        {
+          "teal": 73,
+          "source": "contracts/Game.algo.ts:30",
+          "pc": [
+            179
+          ]
+        },
+        {
+          "teal": 74,
+          "source": "contracts/Game.algo.ts:30",
+          "pc": [
+            180
+          ]
+        },
+        {
+          "teal": 75,
+          "source": "contracts/Game.algo.ts:28",
+          "pc": [
+            181
+          ]
+        },
+        {
+          "teal": 80,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            182,
+            183
+          ]
+        },
+        {
+          "teal": 81,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            184
+          ]
+        },
+        {
+          "teal": 82,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            185
+          ]
+        },
+        {
+          "teal": 83,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            186
+          ]
+        },
+        {
+          "teal": 84,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            187,
+            188
+          ]
+        },
+        {
+          "teal": 85,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            189
+          ]
+        },
+        {
+          "teal": 86,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            190
+          ]
+        },
+        {
+          "teal": 89,
+          "source": "contracts/Game.algo.ts:34",
+          "errorMessage": "argument 0 (ftransx) for depositfundsPlayer1 must be a pay transaction",
+          "pc": [
+            191
+          ]
+        },
+        {
+          "teal": 92,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            192,
+            193,
+            194
+          ]
+        },
+        {
+          "teal": 93,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            195
+          ]
+        },
+        {
+          "teal": 94,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            196
+          ]
+        },
+        {
+          "teal": 98,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            197,
+            198,
+            199
+          ]
+        },
+        {
+          "teal": 104,
+          "source": "contracts/Game.algo.ts:36",
+          "pc": [
+            200,
+            201,
+            202
+          ]
+        },
+        {
+          "teal": 105,
+          "source": "contracts/Game.algo.ts:36",
+          "pc": [
+            203,
+            204
+          ]
+        },
+        {
+          "teal": 106,
+          "source": "contracts/Game.algo.ts:36",
+          "pc": [
+            205
+          ]
+        },
+        {
+          "teal": 107,
+          "source": "contracts/Game.algo.ts:36",
+          "pc": [
+            206
+          ]
+        },
+        {
+          "teal": 108,
+          "source": "contracts/Game.algo.ts:36",
+          "pc": [
+            207
+          ]
+        },
+        {
+          "teal": 109,
+          "source": "contracts/Game.algo.ts:36",
+          "pc": [
+            208
+          ]
+        },
+        {
+          "teal": 110,
+          "source": "contracts/Game.algo.ts:35",
+          "pc": [
+            209
+          ]
+        },
+        {
+          "teal": 117,
+          "source": "contracts/Game.algo.ts:39",
+          "pc": [
+            210,
+            211
+          ]
+        },
+        {
+          "teal": 118,
+          "source": "contracts/Game.algo.ts:40",
+          "pc": [
+            212,
+            213
+          ]
+        },
+        {
+          "teal": 119,
+          "source": "contracts/Game.algo.ts:40",
+          "pc": [
+            214,
+            215
+          ]
+        },
+        {
+          "teal": 120,
+          "source": "contracts/Game.algo.ts:40",
+          "pc": [
+            216
+          ]
+        },
+        {
+          "teal": 123,
+          "source": "contracts/Game.algo.ts:40",
+          "errorMessage": "transaction verification failed: {\"txn\":\"ftransx\",\"field\":\"receiver\",\"expected\":\"this.app.address\"}",
+          "pc": [
+            217
+          ]
+        },
+        {
+          "teal": 127,
+          "source": "contracts/Game.algo.ts:42",
+          "pc": [
+            218
+          ]
+        },
+        {
+          "teal": 128,
+          "source": "contracts/Game.algo.ts:42",
+          "pc": [
+            219
+          ]
+        },
+        {
+          "teal": 129,
+          "source": "contracts/Game.algo.ts:42",
+          "pc": [
+            220,
+            221
+          ]
+        },
+        {
+          "teal": 130,
+          "source": "contracts/Game.algo.ts:42",
+          "pc": [
+            222,
+            223
+          ]
+        },
+        {
+          "teal": 131,
+          "source": "contracts/Game.algo.ts:42",
+          "pc": [
+            224
+          ]
+        },
+        {
+          "teal": 132,
+          "source": "contracts/Game.algo.ts:42",
+          "pc": [
+            225
+          ]
+        },
+        {
+          "teal": 133,
+          "source": "contracts/Game.algo.ts:42",
+          "pc": [
+            226
+          ]
+        },
+        {
+          "teal": 134,
+          "source": "contracts/Game.algo.ts:42",
+          "pc": [
+            227
+          ]
+        },
+        {
+          "teal": 138,
+          "source": "contracts/Game.algo.ts:43",
+          "pc": [
+            228,
+            229
+          ]
+        },
+        {
+          "teal": 139,
+          "source": "contracts/Game.algo.ts:43",
+          "pc": [
+            230,
+            231
+          ]
+        },
+        {
+          "teal": 140,
+          "source": "contracts/Game.algo.ts:43",
+          "pc": [
+            232
+          ]
+        },
+        {
+          "teal": 141,
+          "source": "contracts/Game.algo.ts:34",
+          "pc": [
+            233
+          ]
+        },
+        {
+          "teal": 146,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            234,
+            235
+          ]
+        },
+        {
+          "teal": 147,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            236
+          ]
+        },
+        {
+          "teal": 148,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            237
+          ]
+        },
+        {
+          "teal": 149,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            238
+          ]
+        },
+        {
+          "teal": 150,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            239,
+            240
+          ]
+        },
+        {
+          "teal": 151,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            241
+          ]
+        },
+        {
+          "teal": 152,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            242
+          ]
+        },
+        {
+          "teal": 155,
+          "source": "contracts/Game.algo.ts:47",
+          "errorMessage": "argument 0 (ftransx) for depositfundsPlayer2 must be a pay transaction",
+          "pc": [
+            243
+          ]
+        },
+        {
+          "teal": 158,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            244,
+            245,
+            246
+          ]
+        },
+        {
+          "teal": 159,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            247
+          ]
+        },
+        {
+          "teal": 160,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            248
+          ]
+        },
+        {
+          "teal": 164,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            249,
+            250,
+            251
+          ]
+        },
+        {
+          "teal": 170,
+          "source": "contracts/Game.algo.ts:49",
+          "pc": [
+            252,
+            253,
+            254
+          ]
+        },
+        {
+          "teal": 171,
+          "source": "contracts/Game.algo.ts:49",
+          "pc": [
+            255
+          ]
+        },
+        {
+          "teal": 172,
+          "source": "contracts/Game.algo.ts:49",
+          "pc": [
+            256
+          ]
+        },
+        {
+          "teal": 173,
+          "source": "contracts/Game.algo.ts:49",
+          "pc": [
+            257
+          ]
+        },
+        {
+          "teal": 174,
+          "source": "contracts/Game.algo.ts:49",
+          "pc": [
+            258
+          ]
+        },
+        {
+          "teal": 175,
+          "source": "contracts/Game.algo.ts:49",
+          "pc": [
+            259
+          ]
+        },
+        {
+          "teal": 176,
+          "source": "contracts/Game.algo.ts:48",
+          "pc": [
+            260
+          ]
+        },
+        {
+          "teal": 183,
+          "source": "contracts/Game.algo.ts:52",
+          "pc": [
+            261,
+            262
+          ]
+        },
+        {
+          "teal": 184,
+          "source": "contracts/Game.algo.ts:53",
+          "pc": [
+            263,
+            264
+          ]
+        },
+        {
+          "teal": 185,
+          "source": "contracts/Game.algo.ts:53",
+          "pc": [
+            265,
+            266
+          ]
+        },
+        {
+          "teal": 186,
+          "source": "contracts/Game.algo.ts:53",
+          "pc": [
+            267
+          ]
+        },
+        {
+          "teal": 189,
+          "source": "contracts/Game.algo.ts:53",
+          "errorMessage": "transaction verification failed: {\"txn\":\"ftransx\",\"field\":\"receiver\",\"expected\":\"this.app.address\"}",
+          "pc": [
+            268
+          ]
+        },
+        {
+          "teal": 193,
+          "source": "contracts/Game.algo.ts:55",
+          "pc": [
+            269
+          ]
+        },
+        {
+          "teal": 194,
+          "source": "contracts/Game.algo.ts:55",
+          "pc": [
+            270
+          ]
+        },
+        {
+          "teal": 195,
+          "source": "contracts/Game.algo.ts:55",
+          "pc": [
+            271,
+            272
+          ]
+        },
+        {
+          "teal": 196,
+          "source": "contracts/Game.algo.ts:55",
+          "pc": [
+            273,
+            274
+          ]
+        },
+        {
+          "teal": 197,
+          "source": "contracts/Game.algo.ts:55",
+          "pc": [
+            275
+          ]
+        },
+        {
+          "teal": 198,
+          "source": "contracts/Game.algo.ts:55",
+          "pc": [
+            276
+          ]
+        },
+        {
+          "teal": 199,
+          "source": "contracts/Game.algo.ts:55",
+          "pc": [
+            277
+          ]
+        },
+        {
+          "teal": 200,
+          "source": "contracts/Game.algo.ts:55",
+          "pc": [
+            278
+          ]
+        },
+        {
+          "teal": 204,
+          "source": "contracts/Game.algo.ts:56",
+          "pc": [
+            279
+          ]
+        },
+        {
+          "teal": 205,
+          "source": "contracts/Game.algo.ts:56",
+          "pc": [
+            280,
+            281
+          ]
+        },
+        {
+          "teal": 206,
+          "source": "contracts/Game.algo.ts:56",
+          "pc": [
+            282
+          ]
+        },
+        {
+          "teal": 207,
+          "source": "contracts/Game.algo.ts:47",
+          "pc": [
+            283
+          ]
+        },
+        {
+          "teal": 212,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            284,
+            285,
+            286
+          ]
+        },
+        {
+          "teal": 213,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            287
+          ]
+        },
+        {
+          "teal": 214,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            288
+          ]
+        },
+        {
+          "teal": 215,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            289
+          ]
+        },
+        {
+          "teal": 216,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            290
+          ]
+        },
+        {
+          "teal": 219,
+          "source": "contracts/Game.algo.ts:58",
+          "errorMessage": "argument 0 (player) for sendFunds must be a address",
+          "pc": [
+            291
+          ]
+        },
+        {
+          "teal": 222,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            292,
+            293,
+            294
+          ]
+        },
+        {
+          "teal": 223,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            295
+          ]
+        },
+        {
+          "teal": 224,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            296
+          ]
+        },
+        {
+          "teal": 228,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            297,
+            298,
+            299
+          ]
+        },
+        {
+          "teal": 234,
+          "source": "contracts/Game.algo.ts:61",
+          "pc": [
+            300,
+            301
+          ]
+        },
+        {
+          "teal": 235,
+          "source": "contracts/Game.algo.ts:61",
+          "pc": [
+            302,
+            303,
+            304
+          ]
+        },
+        {
+          "teal": 236,
+          "source": "contracts/Game.algo.ts:61",
+          "pc": [
+            305,
+            306
+          ]
+        },
+        {
+          "teal": 237,
+          "source": "contracts/Game.algo.ts:61",
+          "pc": [
+            307
+          ]
+        },
+        {
+          "teal": 238,
+          "source": "contracts/Game.algo.ts:61",
+          "pc": [
+            308
+          ]
+        },
+        {
+          "teal": 239,
+          "source": "contracts/Game.algo.ts:60",
+          "pc": [
+            309
+          ]
+        },
+        {
+          "teal": 246,
+          "source": "contracts/Game.algo.ts:63",
+          "pc": [
+            310
+          ]
+        },
+        {
+          "teal": 247,
+          "source": "contracts/Game.algo.ts:63",
+          "pc": [
+            311
+          ]
+        },
+        {
+          "teal": 248,
+          "source": "contracts/Game.algo.ts:63",
+          "pc": [
+            312,
+            313
+          ]
+        },
+        {
+          "teal": 252,
+          "source": "contracts/Game.algo.ts:64",
+          "pc": [
+            314,
+            315
+          ]
+        },
+        {
+          "teal": 253,
+          "source": "contracts/Game.algo.ts:64",
+          "pc": [
+            316,
+            317
+          ]
+        },
+        {
+          "teal": 257,
+          "source": "contracts/Game.algo.ts:65",
+          "pc": [
+            318
+          ]
+        },
+        {
+          "teal": 258,
+          "source": "contracts/Game.algo.ts:65",
+          "pc": [
+            319
+          ]
+        },
+        {
+          "teal": 259,
+          "source": "contracts/Game.algo.ts:65",
+          "pc": [
+            320,
+            321
+          ]
+        },
+        {
+          "teal": 262,
+          "source": "contracts/Game.algo.ts:63",
+          "pc": [
+            322
+          ]
+        },
+        {
+          "teal": 263,
+          "source": "contracts/Game.algo.ts:63",
+          "pc": [
+            323,
+            324
+          ]
+        },
+        {
+          "teal": 266,
+          "source": "contracts/Game.algo.ts:63",
+          "pc": [
+            325
+          ]
+        },
+        {
+          "teal": 270,
+          "source": "contracts/Game.algo.ts:67",
+          "pc": [
+            326
+          ]
+        },
+        {
+          "teal": 271,
+          "source": "contracts/Game.algo.ts:67",
+          "pc": [
+            327
+          ]
+        },
+        {
+          "teal": 272,
+          "source": "contracts/Game.algo.ts:67",
+          "pc": [
+            328
+          ]
+        },
+        {
+          "teal": 273,
+          "source": "contracts/Game.algo.ts:58",
+          "pc": [
+            329
+          ]
+        },
+        {
+          "teal": 278,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            330,
+            331,
+            332
+          ]
+        },
+        {
+          "teal": 279,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            333
+          ]
+        },
+        {
+          "teal": 280,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            334
+          ]
+        },
+        {
+          "teal": 281,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            335
+          ]
+        },
+        {
+          "teal": 282,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            336
+          ]
+        },
+        {
+          "teal": 285,
+          "source": "contracts/Game.algo.ts:74",
+          "errorMessage": "argument 0 (player) for joinGame must be a address",
+          "pc": [
+            337
+          ]
+        },
+        {
+          "teal": 288,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            338,
+            339,
+            340
+          ]
+        },
+        {
+          "teal": 289,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            341
+          ]
+        },
+        {
+          "teal": 290,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            342
+          ]
+        },
+        {
+          "teal": 294,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            343,
+            344,
+            345
+          ]
+        },
+        {
+          "teal": 300,
+          "source": "contracts/Game.algo.ts:76",
+          "pc": [
+            346,
+            347,
+            348
+          ]
+        },
+        {
+          "teal": 301,
+          "source": "contracts/Game.algo.ts:76",
+          "pc": [
+            349
+          ]
+        },
+        {
+          "teal": 302,
+          "source": "contracts/Game.algo.ts:76",
+          "pc": [
+            350
+          ]
+        },
+        {
+          "teal": 303,
+          "source": "contracts/Game.algo.ts:76",
+          "pc": [
+            351
+          ]
+        },
+        {
+          "teal": 304,
+          "source": "contracts/Game.algo.ts:76",
+          "pc": [
+            352
+          ]
+        },
+        {
+          "teal": 305,
+          "source": "contracts/Game.algo.ts:76",
+          "pc": [
+            353
+          ]
+        },
+        {
+          "teal": 306,
+          "source": "contracts/Game.algo.ts:75",
+          "pc": [
+            354
+          ]
+        },
+        {
+          "teal": 310,
+          "source": "contracts/Game.algo.ts:79",
+          "pc": [
+            355
+          ]
+        },
+        {
+          "teal": 311,
+          "source": "contracts/Game.algo.ts:79",
+          "pc": [
+            356,
+            357
+          ]
+        },
+        {
+          "teal": 312,
+          "source": "contracts/Game.algo.ts:79",
+          "pc": [
+            358
+          ]
+        },
+        {
+          "teal": 313,
+          "source": "contracts/Game.algo.ts:74",
+          "pc": [
+            359
+          ]
+        },
+        {
+          "teal": 318,
+          "source": "contracts/Game.algo.ts:83",
+          "pc": [
+            360,
+            361,
+            362
+          ]
+        },
+        {
+          "teal": 319,
+          "source": "contracts/Game.algo.ts:83",
+          "pc": [
+            363,
+            364,
+            365
+          ]
+        },
+        {
+          "teal": 322,
+          "source": "contracts/Game.algo.ts:83",
+          "pc": [
+            366,
+            367,
+            368
+          ]
+        },
+        {
+          "teal": 323,
+          "source": "contracts/Game.algo.ts:83",
+          "pc": [
+            369
+          ]
+        },
+        {
+          "teal": 324,
+          "source": "contracts/Game.algo.ts:83",
+          "pc": [
+            370
+          ]
+        },
+        {
+          "teal": 328,
+          "source": "contracts/Game.algo.ts:83",
+          "pc": [
+            371,
+            372,
+            373
+          ]
+        },
+        {
+          "teal": 332,
+          "source": "contracts/Game.algo.ts:86",
+          "pc": [
+            374,
+            375
+          ]
+        },
+        {
+          "teal": 333,
+          "source": "contracts/Game.algo.ts:86",
+          "pc": [
+            376,
+            377
+          ]
+        },
+        {
+          "teal": 334,
+          "source": "contracts/Game.algo.ts:86",
+          "pc": [
+            378
+          ]
+        },
+        {
+          "teal": 335,
+          "source": "contracts/Game.algo.ts:86",
+          "pc": [
+            379
+          ]
+        },
+        {
+          "teal": 336,
+          "source": "contracts/Game.algo.ts:86",
+          "pc": [
+            380
+          ]
+        },
+        {
+          "teal": 340,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            381
+          ]
+        },
+        {
+          "teal": 341,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            382
+          ]
+        },
+        {
+          "teal": 342,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            383
+          ]
+        },
+        {
+          "teal": 343,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            384
+          ]
+        },
+        {
+          "teal": 344,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            385,
+            386
+          ]
+        },
+        {
+          "teal": 345,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            387
+          ]
+        },
+        {
+          "teal": 346,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            388
+          ]
+        },
+        {
+          "teal": 347,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            389
+          ]
+        },
+        {
+          "teal": 348,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            390,
+            391,
+            392
+          ]
+        },
+        {
+          "teal": 349,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            393
+          ]
+        },
+        {
+          "teal": 350,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            394
+          ]
+        },
+        {
+          "teal": 351,
+          "source": "contracts/Game.algo.ts:88",
+          "pc": [
+            395
+          ]
+        },
+        {
+          "teal": 355,
+          "source": "contracts/Game.algo.ts:89",
+          "pc": [
+            396,
+            397
+          ]
+        },
+        {
+          "teal": 356,
+          "source": "contracts/Game.algo.ts:89",
+          "pc": [
+            398
+          ]
+        },
+        {
+          "teal": 357,
+          "source": "contracts/Game.algo.ts:89",
+          "pc": [
+            399
+          ]
+        },
+        {
+          "teal": 358,
+          "source": "contracts/Game.algo.ts:89",
+          "pc": [
+            400
+          ]
+        },
+        {
+          "teal": 359,
+          "source": "contracts/Game.algo.ts:89",
+          "pc": [
+            401,
+            402
+          ]
+        },
+        {
+          "teal": 360,
+          "source": "contracts/Game.algo.ts:89",
+          "pc": [
+            403
+          ]
+        },
+        {
+          "teal": 361,
+          "source": "contracts/Game.algo.ts:89",
+          "pc": [
+            404
+          ]
+        },
+        {
+          "teal": 362,
+          "source": "contracts/Game.algo.ts:83",
+          "pc": [
+            405
+          ]
+        },
+        {
+          "teal": 367,
+          "source": "contracts/Game.algo.ts:93",
+          "pc": [
+            406,
+            407,
+            408
+          ]
+        },
+        {
+          "teal": 368,
+          "source": "contracts/Game.algo.ts:93",
+          "pc": [
+            409,
+            410,
+            411
+          ]
+        },
+        {
+          "teal": 371,
+          "source": "contracts/Game.algo.ts:93",
+          "pc": [
+            412,
+            413,
+            414
+          ]
+        },
+        {
+          "teal": 372,
+          "source": "contracts/Game.algo.ts:93",
+          "pc": [
+            415
+          ]
+        },
+        {
+          "teal": 373,
+          "source": "contracts/Game.algo.ts:93",
+          "pc": [
+            416
+          ]
+        },
+        {
+          "teal": 377,
+          "source": "contracts/Game.algo.ts:93",
+          "pc": [
+            417,
+            418,
+            419
+          ]
+        },
+        {
+          "teal": 381,
+          "source": "contracts/Game.algo.ts:96",
+          "pc": [
+            420,
+            421
+          ]
+        },
+        {
+          "teal": 382,
+          "source": "contracts/Game.algo.ts:96",
+          "pc": [
+            422
+          ]
+        },
+        {
+          "teal": 383,
+          "source": "contracts/Game.algo.ts:96",
+          "pc": [
+            423
+          ]
+        },
+        {
+          "teal": 384,
+          "source": "contracts/Game.algo.ts:96",
+          "pc": [
+            424
+          ]
+        },
+        {
+          "teal": 385,
+          "source": "contracts/Game.algo.ts:96",
+          "pc": [
+            425
+          ]
+        },
+        {
+          "teal": 389,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            426
+          ]
+        },
+        {
+          "teal": 390,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            427
+          ]
+        },
+        {
+          "teal": 391,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            428
+          ]
+        },
+        {
+          "teal": 392,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            429
+          ]
+        },
+        {
+          "teal": 393,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            430,
+            431
+          ]
+        },
+        {
+          "teal": 394,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            432
+          ]
+        },
+        {
+          "teal": 395,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            433
+          ]
+        },
+        {
+          "teal": 396,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            434
+          ]
+        },
+        {
+          "teal": 397,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            435,
+            436,
+            437
+          ]
+        },
+        {
+          "teal": 398,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            438
+          ]
+        },
+        {
+          "teal": 399,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            439
+          ]
+        },
+        {
+          "teal": 400,
+          "source": "contracts/Game.algo.ts:98",
+          "pc": [
+            440
+          ]
+        },
+        {
+          "teal": 404,
+          "source": "contracts/Game.algo.ts:99",
+          "pc": [
+            441,
+            442
+          ]
+        },
+        {
+          "teal": 405,
+          "source": "contracts/Game.algo.ts:99",
+          "pc": [
+            443
+          ]
+        },
+        {
+          "teal": 406,
+          "source": "contracts/Game.algo.ts:99",
+          "pc": [
+            444
+          ]
+        },
+        {
+          "teal": 407,
+          "source": "contracts/Game.algo.ts:99",
+          "pc": [
+            445
+          ]
+        },
+        {
+          "teal": 408,
+          "source": "contracts/Game.algo.ts:99",
+          "pc": [
+            446,
+            447
+          ]
+        },
+        {
+          "teal": 409,
+          "source": "contracts/Game.algo.ts:99",
+          "pc": [
+            448
+          ]
+        },
+        {
+          "teal": 410,
+          "source": "contracts/Game.algo.ts:99",
+          "pc": [
+            449
+          ]
+        },
+        {
+          "teal": 411,
+          "source": "contracts/Game.algo.ts:93",
+          "pc": [
+            450
+          ]
+        },
+        {
+          "teal": 414,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            451,
+            452,
+            453,
+            454,
+            455,
+            456
+          ]
+        },
+        {
+          "teal": 415,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            457,
+            458,
+            459
+          ]
+        },
+        {
+          "teal": 416,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            460,
+            461,
+            462,
+            463
+          ]
+        },
+        {
+          "teal": 419,
+          "source": "contracts/Game.algo.ts:4",
+          "errorMessage": "this contract does not implement the given ABI method for create NoOp",
+          "pc": [
+            464
+          ]
+        },
+        {
+          "teal": 422,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            465,
+            466,
+            467,
+            468,
+            469,
+            470
+          ]
+        },
+        {
+          "teal": 423,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            471,
+            472,
+            473,
+            474,
+            475,
+            476
+          ]
+        },
+        {
+          "teal": 424,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            477,
+            478,
+            479,
+            480,
+            481,
+            482
+          ]
+        },
+        {
+          "teal": 425,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            483,
+            484,
+            485,
+            486,
+            487,
+            488
+          ]
+        },
+        {
+          "teal": 426,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            489,
+            490,
+            491,
+            492,
+            493,
+            494
+          ]
+        },
+        {
+          "teal": 427,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            495,
+            496,
+            497,
+            498,
+            499,
+            500
+          ]
+        },
+        {
+          "teal": 428,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            501,
+            502,
+            503,
+            504,
+            505,
+            506
+          ]
+        },
+        {
+          "teal": 429,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            507,
+            508,
+            509
+          ]
+        },
+        {
+          "teal": 430,
+          "source": "contracts/Game.algo.ts:4",
+          "pc": [
+            510,
+            511,
+            512,
+            513,
+            514,
+            515,
+            516,
+            517,
+            518,
+            519,
+            520,
+            521,
+            522,
+            523,
+            524,
+            525
+          ]
+        },
+        {
+          "teal": 433,
+          "source": "contracts/Game.algo.ts:4",
+          "errorMessage": "this contract does not implement the given ABI method for call NoOp",
+          "pc": [
+            526
+          ]
+        }
+      ],
+      "pcOffsetMethod": "none"
+    },
+    "clear": {
+      "sourceInfo": [],
+      "pcOffsetMethod": "none"
+    }
+  },
+  "source": {
+    "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCmludGNibG9jayAxIDAgNDAwIDMyCmJ5dGVjYmxvY2sgMHg2NDY1NzA2ZjczNjk3NDY1NjQ0MTZkNmY3NTZlNzQgMHg3MDZjNjE3OTY1NzIzMiAweDcwNmM2MTc5NjU3MjMxNGQ2Zjc2NjUgMHg3MDZjNjE3OTY1NzIzMjRkNmY3NjY1IDB4NzA2YzYxNzk2NTcyMzEgMHg3MDZjNjE3OTY1NzIzMTQzNjg2MTZlNjM2NTczIDB4NzA2YzYxNzk2NTcyMzI0MzY4NjE2ZTYzNjU3MwoKLy8gVGhpcyBURUFMIHdhcyBnZW5lcmF0ZWQgYnkgVEVBTFNjcmlwdCB2MC4xMDUuNAovLyBodHRwczovL2dpdGh1Yi5jb20vYWxnb3JhbmRmb3VuZGF0aW9uL1RFQUxTY3JpcHQKCi8vIFRoaXMgY29udHJhY3QgaXMgY29tcGxpYW50IHdpdGggYW5kL29yIGltcGxlbWVudHMgdGhlIGZvbGxvd2luZyBBUkNzOiBbIEFSQzQgXQoKLy8gVGhlIGZvbGxvd2luZyB0ZW4gbGluZXMgb2YgVEVBTCBoYW5kbGUgaW5pdGlhbCBwcm9ncmFtIGZsb3cKLy8gVGhpcyBwYXR0ZXJuIGlzIHVzZWQgdG8gbWFrZSBpdCBlYXN5IGZvciBhbnlvbmUgdG8gcGFyc2UgdGhlIHN0YXJ0IG9mIHRoZSBwcm9ncmFtIGFuZCBkZXRlcm1pbmUgaWYgYSBzcGVjaWZpYyBhY3Rpb24gaXMgYWxsb3dlZAovLyBIZXJlLCBhY3Rpb24gcmVmZXJzIHRvIHRoZSBPbkNvbXBsZXRlIGluIGNvbWJpbmF0aW9uIHdpdGggd2hldGhlciB0aGUgYXBwIGlzIGJlaW5nIGNyZWF0ZWQgb3IgY2FsbGVkCi8vIEV2ZXJ5IHBvc3NpYmxlIGFjdGlvbiBmb3IgdGhpcyBjb250cmFjdCBpcyByZXByZXNlbnRlZCBpbiB0aGUgc3dpdGNoIHN0YXRlbWVudAovLyBJZiB0aGUgYWN0aW9uIGlzIG5vdCBpbXBsZW1lbnRlZCBpbiB0aGUgY29udHJhY3QsIGl0cyByZXNwZWN0aXZlIGJyYW5jaCB3aWxsIGJlICIqTk9UX0lNUExFTUVOVEVEIiB3aGljaCBqdXN0IGNvbnRhaW5zICJlcnIiCnR4biBBcHBsaWNhdGlvbklECiEKcHVzaGludCA2CioKdHhuIE9uQ29tcGxldGlvbgorCnN3aXRjaCAqY2FsbF9Ob09wICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqY3JlYXRlX05vT3AgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVECgoqTk9UX0lNUExFTUVOVEVEOgoJLy8gVGhlIHJlcXVlc3RlZCBhY3Rpb24gaXMgbm90IGltcGxlbWVudGVkIGluIHRoaXMgY29udHJhY3QuIEFyZSB5b3UgdXNpbmcgdGhlIGNvcnJlY3QgT25Db21wbGV0ZT8gRGlkIHlvdSBzZXQgeW91ciBhcHAgSUQ/CgllcnIKCi8vIGNyZWF0ZUFwcGxpY2F0aW9uKCl2b2lkCiphYmlfcm91dGVfY3JlYXRlQXBwbGljYXRpb246CgkvLyBleGVjdXRlIGNyZWF0ZUFwcGxpY2F0aW9uKCl2b2lkCgljYWxsc3ViIGNyZWF0ZUFwcGxpY2F0aW9uCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBjcmVhdGVBcHBsaWNhdGlvbigpOiB2b2lkCmNyZWF0ZUFwcGxpY2F0aW9uOgoJcHJvdG8gMCAwCgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czoyMwoJLy8gdGhpcy5kZXBvc2l0ZWRBbW91bnQudmFsdWUgPSAwCglieXRlYyAwIC8vICAiZGVwb3NpdGVkQW1vdW50IgoJaW50YyAxIC8vIDAKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czoyNAoJLy8gdGhpcy5tYXhEZXBvc2l0QW1vdW50LnZhbHVlID0gNQoJcHVzaGJ5dGVzIDB4NmQ2MTc4NDQ2NTcwNmY3MzY5NzQ0MTZkNmY3NTZlNzQgLy8gIm1heERlcG9zaXRBbW91bnQiCglwdXNoaW50IDUKCWFwcF9nbG9iYWxfcHV0CglyZXRzdWIKCi8vIGNyZWF0ZUJveCgpdm9pZAoqYWJpX3JvdXRlX2NyZWF0ZUJveDoKCS8vIGV4ZWN1dGUgY3JlYXRlQm94KCl2b2lkCgljYWxsc3ViIGNyZWF0ZUJveAoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gY3JlYXRlQm94KCk6IHZvaWQKY3JlYXRlQm94OgoJcHJvdG8gMCAwCgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czoyOQoJLy8gdGhpcy5wbGF5ZXIxTW92ZS5jcmVhdGUoNDAwKQoJYnl0ZWMgMiAvLyAgInBsYXllcjFNb3ZlIgoJaW50YyAyIC8vIDQwMAoJYm94X2NyZWF0ZQoJcG9wCgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czozMAoJLy8gdGhpcy5wbGF5ZXIyTW92ZS5jcmVhdGUoNDAwKQoJYnl0ZWMgMyAvLyAgInBsYXllcjJNb3ZlIgoJaW50YyAyIC8vIDQwMAoJYm94X2NyZWF0ZQoJcG9wCglyZXRzdWIKCi8vIGRlcG9zaXRmdW5kc1BsYXllcjEocGF5KXZvaWQKKmFiaV9yb3V0ZV9kZXBvc2l0ZnVuZHNQbGF5ZXIxOgoJLy8gZnRyYW5zeDogcGF5Cgl0eG4gR3JvdXBJbmRleAoJaW50YyAwIC8vIDEKCS0KCWR1cAoJZ3R4bnMgVHlwZUVudW0KCWludGMgMCAvLyAgcGF5Cgk9PQoKCS8vIGFyZ3VtZW50IDAgKGZ0cmFuc3gpIGZvciBkZXBvc2l0ZnVuZHNQbGF5ZXIxIG11c3QgYmUgYSBwYXkgdHJhbnNhY3Rpb24KCWFzc2VydAoKCS8vIGV4ZWN1dGUgZGVwb3NpdGZ1bmRzUGxheWVyMShwYXkpdm9pZAoJY2FsbHN1YiBkZXBvc2l0ZnVuZHNQbGF5ZXIxCglpbnRjIDAgLy8gMQoJcmV0dXJuCgovLyBkZXBvc2l0ZnVuZHNQbGF5ZXIxKGZ0cmFuc3ggOiBQYXlUeG4pOiB2b2lkCmRlcG9zaXRmdW5kc1BsYXllcjE6Cglwcm90byAxIDAKCgkvLyBjb250cmFjdHMvR2FtZS5hbGdvLnRzOjM1CgkvLyBhc3NlcnQoCgkvLyAgICAgICAgICAgIXRoaXMucGxheWVyMS5leGlzdHMKCS8vICAgICAgICAgKQoJdHhuYSBBcHBsaWNhdGlvbnMgMAoJYnl0ZWMgNCAvLyAgInBsYXllcjEiCglhcHBfZ2xvYmFsX2dldF9leAoJc3dhcAoJcG9wCgkhCglhc3NlcnQKCgkvLyBjb250cmFjdHMvR2FtZS5hbGdvLnRzOjM5CgkvLyB2ZXJpZnlQYXlUeG4oZnRyYW5zeCwgewoJLy8gICAgICAgICAgICAgcmVjZWl2ZXI6IHRoaXMuYXBwLmFkZHJlc3MsCgkvLyAgICAgICAgICAgICB9KQoJLy8gdmVyaWZ5IHJlY2VpdmVyCglmcmFtZV9kaWcgLTEgLy8gZnRyYW5zeDogUGF5VHhuCglndHhucyBSZWNlaXZlcgoJZ2xvYmFsIEN1cnJlbnRBcHBsaWNhdGlvbkFkZHJlc3MKCT09CgoJLy8gdHJhbnNhY3Rpb24gdmVyaWZpY2F0aW9uIGZhaWxlZDogeyJ0eG4iOiJmdHJhbnN4IiwiZmllbGQiOiJyZWNlaXZlciIsImV4cGVjdGVkIjoidGhpcy5hcHAuYWRkcmVzcyJ9Cglhc3NlcnQKCgkvLyBjb250cmFjdHMvR2FtZS5hbGdvLnRzOjQyCgkvLyB0aGlzLmRlcG9zaXRlZEFtb3VudC52YWx1ZSArPSBmdHJhbnN4LmFtb3VudAoJYnl0ZWMgMCAvLyAgImRlcG9zaXRlZEFtb3VudCIKCWFwcF9nbG9iYWxfZ2V0CglmcmFtZV9kaWcgLTEgLy8gZnRyYW5zeDogUGF5VHhuCglndHhucyBBbW91bnQKCSsKCWJ5dGVjIDAgLy8gICJkZXBvc2l0ZWRBbW91bnQiCglzd2FwCglhcHBfZ2xvYmFsX3B1dAoKCS8vIGNvbnRyYWN0cy9HYW1lLmFsZ28udHM6NDMKCS8vIHRoaXMucGxheWVyMS52YWx1ZT10aGlzLnR4bi5zZW5kZXIKCWJ5dGVjIDQgLy8gICJwbGF5ZXIxIgoJdHhuIFNlbmRlcgoJYXBwX2dsb2JhbF9wdXQKCXJldHN1YgoKLy8gZGVwb3NpdGZ1bmRzUGxheWVyMihwYXkpdm9pZAoqYWJpX3JvdXRlX2RlcG9zaXRmdW5kc1BsYXllcjI6CgkvLyBmdHJhbnN4OiBwYXkKCXR4biBHcm91cEluZGV4CglpbnRjIDAgLy8gMQoJLQoJZHVwCglndHhucyBUeXBlRW51bQoJaW50YyAwIC8vICBwYXkKCT09CgoJLy8gYXJndW1lbnQgMCAoZnRyYW5zeCkgZm9yIGRlcG9zaXRmdW5kc1BsYXllcjIgbXVzdCBiZSBhIHBheSB0cmFuc2FjdGlvbgoJYXNzZXJ0CgoJLy8gZXhlY3V0ZSBkZXBvc2l0ZnVuZHNQbGF5ZXIyKHBheSl2b2lkCgljYWxsc3ViIGRlcG9zaXRmdW5kc1BsYXllcjIKCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIGRlcG9zaXRmdW5kc1BsYXllcjIoZnRyYW5zeCA6IFBheVR4bik6IHZvaWQKZGVwb3NpdGZ1bmRzUGxheWVyMjoKCXByb3RvIDEgMAoKCS8vIGNvbnRyYWN0cy9HYW1lLmFsZ28udHM6NDgKCS8vIGFzc2VydCgKCS8vICAgICAgICAgICAhdGhpcy5wbGF5ZXIyLmV4aXN0cwoJLy8gICAgICAgICApCgl0eG5hIEFwcGxpY2F0aW9ucyAwCglieXRlYyAxIC8vICAicGxheWVyMiIKCWFwcF9nbG9iYWxfZ2V0X2V4Cglzd2FwCglwb3AKCSEKCWFzc2VydAoKCS8vIGNvbnRyYWN0cy9HYW1lLmFsZ28udHM6NTIKCS8vIHZlcmlmeVBheVR4bihmdHJhbnN4LCB7CgkvLyAgICAgICAgICAgICByZWNlaXZlcjogdGhpcy5hcHAuYWRkcmVzcywKCS8vICAgICAgICAgICAgIH0pCgkvLyB2ZXJpZnkgcmVjZWl2ZXIKCWZyYW1lX2RpZyAtMSAvLyBmdHJhbnN4OiBQYXlUeG4KCWd0eG5zIFJlY2VpdmVyCglnbG9iYWwgQ3VycmVudEFwcGxpY2F0aW9uQWRkcmVzcwoJPT0KCgkvLyB0cmFuc2FjdGlvbiB2ZXJpZmljYXRpb24gZmFpbGVkOiB7InR4biI6ImZ0cmFuc3giLCJmaWVsZCI6InJlY2VpdmVyIiwiZXhwZWN0ZWQiOiJ0aGlzLmFwcC5hZGRyZXNzIn0KCWFzc2VydAoKCS8vIGNvbnRyYWN0cy9HYW1lLmFsZ28udHM6NTUKCS8vIHRoaXMuZGVwb3NpdGVkQW1vdW50LnZhbHVlICs9IGZ0cmFuc3guYW1vdW50CglieXRlYyAwIC8vICAiZGVwb3NpdGVkQW1vdW50IgoJYXBwX2dsb2JhbF9nZXQKCWZyYW1lX2RpZyAtMSAvLyBmdHJhbnN4OiBQYXlUeG4KCWd0eG5zIEFtb3VudAoJKwoJYnl0ZWMgMCAvLyAgImRlcG9zaXRlZEFtb3VudCIKCXN3YXAKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czo1NgoJLy8gdGhpcy5wbGF5ZXIyLnZhbHVlPXRoaXMudHhuLnNlbmRlcgoJYnl0ZWMgMSAvLyAgInBsYXllcjIiCgl0eG4gU2VuZGVyCglhcHBfZ2xvYmFsX3B1dAoJcmV0c3ViCgovLyBzZW5kRnVuZHMoYWRkcmVzcyl2b2lkCiphYmlfcm91dGVfc2VuZEZ1bmRzOgoJLy8gcGxheWVyOiBhZGRyZXNzCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglkdXAKCWxlbgoJaW50YyAzIC8vIDMyCgk9PQoKCS8vIGFyZ3VtZW50IDAgKHBsYXllcikgZm9yIHNlbmRGdW5kcyBtdXN0IGJlIGEgYWRkcmVzcwoJYXNzZXJ0CgoJLy8gZXhlY3V0ZSBzZW5kRnVuZHMoYWRkcmVzcyl2b2lkCgljYWxsc3ViIHNlbmRGdW5kcwoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gc2VuZEZ1bmRzKHBsYXllcjogQWRkcmVzcyk6IHZvaWQKc2VuZEZ1bmRzOgoJcHJvdG8gMSAwCgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czo2MAoJLy8gYXNzZXJ0KAoJLy8gICAgICAgICAgICAgdGhpcy50eG4uc2VuZGVyID09PSB0aGlzLmFwcC5jcmVhdG9yCgkvLyAgICAgICAgICAgKQoJdHhuIFNlbmRlcgoJdHhuYSBBcHBsaWNhdGlvbnMgMAoJYXBwX3BhcmFtc19nZXQgQXBwQ3JlYXRvcgoJcG9wCgk9PQoJYXNzZXJ0CgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czo2MwoJLy8gc2VuZFBheW1lbnQoewoJLy8gICAgICAgICAgICAgcmVjZWl2ZXI6IHBsYXllciwKCS8vICAgICAgICAgICAgIGFtb3VudDogdGhpcy5kZXBvc2l0ZWRBbW91bnQudmFsdWUsCgkvLyAgICAgICAgICAgfSkKCWl0eG5fYmVnaW4KCWludGMgMCAvLyAgcGF5CglpdHhuX2ZpZWxkIFR5cGVFbnVtCgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czo2NAoJLy8gcmVjZWl2ZXI6IHBsYXllcgoJZnJhbWVfZGlnIC0xIC8vIHBsYXllcjogQWRkcmVzcwoJaXR4bl9maWVsZCBSZWNlaXZlcgoKCS8vIGNvbnRyYWN0cy9HYW1lLmFsZ28udHM6NjUKCS8vIGFtb3VudDogdGhpcy5kZXBvc2l0ZWRBbW91bnQudmFsdWUKCWJ5dGVjIDAgLy8gICJkZXBvc2l0ZWRBbW91bnQiCglhcHBfZ2xvYmFsX2dldAoJaXR4bl9maWVsZCBBbW91bnQKCgkvLyBGZWUgZmllbGQgbm90IHNldCwgZGVmYXVsdGluZyB0byAwCglpbnRjIDEgLy8gMAoJaXR4bl9maWVsZCBGZWUKCgkvLyBTdWJtaXQgaW5uZXIgdHJhbnNhY3Rpb24KCWl0eG5fc3VibWl0CgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czo2NwoJLy8gdGhpcy5kZXBvc2l0ZWRBbW91bnQudmFsdWUgPSAwCglieXRlYyAwIC8vICAiZGVwb3NpdGVkQW1vdW50IgoJaW50YyAxIC8vIDAKCWFwcF9nbG9iYWxfcHV0CglyZXRzdWIKCi8vIGpvaW5HYW1lKGFkZHJlc3Mpdm9pZAoqYWJpX3JvdXRlX2pvaW5HYW1lOgoJLy8gcGxheWVyOiBhZGRyZXNzCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglkdXAKCWxlbgoJaW50YyAzIC8vIDMyCgk9PQoKCS8vIGFyZ3VtZW50IDAgKHBsYXllcikgZm9yIGpvaW5HYW1lIG11c3QgYmUgYSBhZGRyZXNzCglhc3NlcnQKCgkvLyBleGVjdXRlIGpvaW5HYW1lKGFkZHJlc3Mpdm9pZAoJY2FsbHN1YiBqb2luR2FtZQoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gam9pbkdhbWUocGxheWVyOiBBZGRyZXNzKTogdm9pZApqb2luR2FtZToKCXByb3RvIDEgMAoKCS8vIGNvbnRyYWN0cy9HYW1lLmFsZ28udHM6NzUKCS8vIGFzc2VydCgKCS8vICAgICAgICAgICAgICF0aGlzLnBsYXllcjIuZXhpc3RzCgkvLyAgICAgICAgICAgKQoJdHhuYSBBcHBsaWNhdGlvbnMgMAoJYnl0ZWMgMSAvLyAgInBsYXllcjIiCglhcHBfZ2xvYmFsX2dldF9leAoJc3dhcAoJcG9wCgkhCglhc3NlcnQKCgkvLyBjb250cmFjdHMvR2FtZS5hbGdvLnRzOjc5CgkvLyB0aGlzLnBsYXllcjIudmFsdWUgPXBsYXllcgoJYnl0ZWMgMSAvLyAgInBsYXllcjIiCglmcmFtZV9kaWcgLTEgLy8gcGxheWVyOiBBZGRyZXNzCglhcHBfZ2xvYmFsX3B1dAoJcmV0c3ViCgovLyBwbGF5ZXIxdHVybihzdHJpbmcpdm9pZAoqYWJpX3JvdXRlX3BsYXllcjF0dXJuOgoJLy8gbW92ZTogc3RyaW5nCgl0eG5hIEFwcGxpY2F0aW9uQXJncyAxCglleHRyYWN0IDIgMAoKCS8vIGV4ZWN1dGUgcGxheWVyMXR1cm4oc3RyaW5nKXZvaWQKCWNhbGxzdWIgcGxheWVyMXR1cm4KCWludGMgMCAvLyAxCglyZXR1cm4KCi8vIHBsYXllcjF0dXJuKG1vdmUgOiBzdHJpbmcpOiB2b2lkCnBsYXllcjF0dXJuOgoJcHJvdG8gMSAwCgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czo4NgoJLy8gYXNzZXJ0KHRoaXMudHhuLnNlbmRlciA9PSB0aGlzLnBsYXllcjEudmFsdWUgKQoJdHhuIFNlbmRlcgoJYnl0ZWMgNCAvLyAgInBsYXllcjEiCglhcHBfZ2xvYmFsX2dldAoJPT0KCWFzc2VydAoKCS8vIGNvbnRyYWN0cy9HYW1lLmFsZ28udHM6ODgKCS8vIHRoaXMucGxheWVyMU1vdmUudmFsdWUgPSBtb3ZlCglieXRlYyAyIC8vICAicGxheWVyMU1vdmUiCglkdXAKCWJveF9kZWwKCXBvcAoJZnJhbWVfZGlnIC0xIC8vIG1vdmU6IHN0cmluZwoJZHVwCglsZW4KCWl0b2IKCWV4dHJhY3QgNiAyCglzd2FwCgljb25jYXQKCWJveF9wdXQKCgkvLyBjb250cmFjdHMvR2FtZS5hbGdvLnRzOjg5CgkvLyB0aGlzLnBsYXllcjFDaGFuY2VzLnZhbHVlKz0xCglieXRlYyA1IC8vICAicGxheWVyMUNoYW5jZXMiCglhcHBfZ2xvYmFsX2dldAoJaW50YyAwIC8vIDEKCSsKCWJ5dGVjIDUgLy8gICJwbGF5ZXIxQ2hhbmNlcyIKCXN3YXAKCWFwcF9nbG9iYWxfcHV0CglyZXRzdWIKCi8vIHBsYXllcjJ0dXJuKHN0cmluZyl2b2lkCiphYmlfcm91dGVfcGxheWVyMnR1cm46CgkvLyBtb3ZlOiBzdHJpbmcKCXR4bmEgQXBwbGljYXRpb25BcmdzIDEKCWV4dHJhY3QgMiAwCgoJLy8gZXhlY3V0ZSBwbGF5ZXIydHVybihzdHJpbmcpdm9pZAoJY2FsbHN1YiBwbGF5ZXIydHVybgoJaW50YyAwIC8vIDEKCXJldHVybgoKLy8gcGxheWVyMnR1cm4obW92ZSA6IHN0cmluZyk6IHZvaWQKcGxheWVyMnR1cm46Cglwcm90byAxIDAKCgkvLyBjb250cmFjdHMvR2FtZS5hbGdvLnRzOjk2CgkvLyBhc3NlcnQodGhpcy50eG4uc2VuZGVyID09IHRoaXMucGxheWVyMi52YWx1ZSApCgl0eG4gU2VuZGVyCglieXRlYyAxIC8vICAicGxheWVyMiIKCWFwcF9nbG9iYWxfZ2V0Cgk9PQoJYXNzZXJ0CgoJLy8gY29udHJhY3RzL0dhbWUuYWxnby50czo5OAoJLy8gdGhpcy5wbGF5ZXIyTW92ZS52YWx1ZSA9IG1vdmUKCWJ5dGVjIDMgLy8gICJwbGF5ZXIyTW92ZSIKCWR1cAoJYm94X2RlbAoJcG9wCglmcmFtZV9kaWcgLTEgLy8gbW92ZTogc3RyaW5nCglkdXAKCWxlbgoJaXRvYgoJZXh0cmFjdCA2IDIKCXN3YXAKCWNvbmNhdAoJYm94X3B1dAoKCS8vIGNvbnRyYWN0cy9HYW1lLmFsZ28udHM6OTkKCS8vIHRoaXMucGxheWVyMkNoYW5jZXMudmFsdWUrPTEKCWJ5dGVjIDYgLy8gICJwbGF5ZXIyQ2hhbmNlcyIKCWFwcF9nbG9iYWxfZ2V0CglpbnRjIDAgLy8gMQoJKwoJYnl0ZWMgNiAvLyAgInBsYXllcjJDaGFuY2VzIgoJc3dhcAoJYXBwX2dsb2JhbF9wdXQKCXJldHN1YgoKKmNyZWF0ZV9Ob09wOgoJcHVzaGJ5dGVzIDB4Yjg0NDdiMzYgLy8gbWV0aG9kICJjcmVhdGVBcHBsaWNhdGlvbigpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfY3JlYXRlQXBwbGljYXRpb24KCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY3JlYXRlIE5vT3AKCWVycgoKKmNhbGxfTm9PcDoKCXB1c2hieXRlcyAweGVhMDQ1MDM2IC8vIG1ldGhvZCAiY3JlYXRlQm94KCl2b2lkIgoJcHVzaGJ5dGVzIDB4MmRlMzVhYjUgLy8gbWV0aG9kICJkZXBvc2l0ZnVuZHNQbGF5ZXIxKHBheSl2b2lkIgoJcHVzaGJ5dGVzIDB4ZmI4ZTcxMTAgLy8gbWV0aG9kICJkZXBvc2l0ZnVuZHNQbGF5ZXIyKHBheSl2b2lkIgoJcHVzaGJ5dGVzIDB4M2ExOWQwZGUgLy8gbWV0aG9kICJzZW5kRnVuZHMoYWRkcmVzcyl2b2lkIgoJcHVzaGJ5dGVzIDB4MzdmZTlkY2MgLy8gbWV0aG9kICJqb2luR2FtZShhZGRyZXNzKXZvaWQiCglwdXNoYnl0ZXMgMHhhYmVjZWQ3NSAvLyBtZXRob2QgInBsYXllcjF0dXJuKHN0cmluZyl2b2lkIgoJcHVzaGJ5dGVzIDB4N2ZlYzA3YzQgLy8gbWV0aG9kICJwbGF5ZXIydHVybihzdHJpbmcpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfY3JlYXRlQm94ICphYmlfcm91dGVfZGVwb3NpdGZ1bmRzUGxheWVyMSAqYWJpX3JvdXRlX2RlcG9zaXRmdW5kc1BsYXllcjIgKmFiaV9yb3V0ZV9zZW5kRnVuZHMgKmFiaV9yb3V0ZV9qb2luR2FtZSAqYWJpX3JvdXRlX3BsYXllcjF0dXJuICphYmlfcm91dGVfcGxheWVyMnR1cm4KCgkvLyB0aGlzIGNvbnRyYWN0IGRvZXMgbm90IGltcGxlbWVudCB0aGUgZ2l2ZW4gQUJJIG1ldGhvZCBmb3IgY2FsbCBOb09wCgllcnI=",
+    "clear": "I3ByYWdtYSB2ZXJzaW9uIDEw"
+  },
+  "byteCode": {
+    "approval": "CiAEAQCQAyAmBw9kZXBvc2l0ZWRBbW91bnQHcGxheWVyMgtwbGF5ZXIxTW92ZQtwbGF5ZXIyTW92ZQdwbGF5ZXIxDnBsYXllcjFDaGFuY2VzDnBsYXllcjJDaGFuY2VzMRgUgQYLMRkIjQwBTgAAAAAAAAAAAAABQAAAAAAAAAAAAAAAiAACIkOKAAAoI2eAEG1heERlcG9zaXRBbW91bnSBBWeJiAACIkOKAAAqJLlIKyS5SIkxFiIJSTgQIhJEiAACIkOKAQA2MgAnBGVMSBREi/84BzIKEkQoZIv/OAgIKExnJwQxAGeJMRYiCUk4ECISRIgAAiJDigEANjIAKWVMSBREi/84BzIKEkQoZIv/OAgIKExnKTEAZ4k2GgFJFSUSRIgAAiJDigEAMQA2MgByB0gSRLEishCL/7IHKGSyCCOyAbMoI2eJNhoBSRUlEkSIAAIiQ4oBADYyACllTEgURCmL/2eJNhoBVwIAiAACIkOKAQAxACcEZBJEKkm8SIv/SRUWVwYCTFC/JwVkIggnBUxniTYaAVcCAIgAAiJDigEAMQApZBJEK0m8SIv/SRUWVwYCTFC/JwZkIggnBkxniYAEuER7NjYaAI4B/rQAgATqBFA2gAQt41q1gAT7jnEQgAQ6GdDegAQ3/p3MgASr7O11gAR/7AfENhoAjgf+l/6o/tz/Dv88/1r/iAA=",
+    "clear": "Cg=="
+  },
+  "compilerInfo": {
+    "compiler": "algod",
+    "compilerVersion": {
+      "major": 4,
+      "minor": 0,
+      "patch": 2,
+      "commitHash": "6b940281"
+    }
+  }
+}

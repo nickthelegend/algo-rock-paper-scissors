@@ -10,18 +10,9 @@ import Image from "next/image"
 import { useWallet } from "@txnlab/use-wallet-react"
 import { getGameByAppId } from "@/lib/supabase"
 import { hasPlayerDeposited, PLAYER1_KEY, PLAYER2_KEY } from "@/lib/algorand"
-import algosdk from "algosdk"
-import { useToast } from "@/hooks/use-toast"
 
 // Import the encryption functions at the top of the file
 import { encrypt, decrypt } from "@/lib/encryption"
-const METHODS = [
-  
-  new algosdk.ABIMethod({ name: "createBox", desc: "", args: [], returns: { type: "void", desc: "" } }),
-  new algosdk.ABIMethod({ name: "player1turn", desc: "", args: [{ type: "string", name: "move", desc: "" }], returns: { type: "void", desc: "" } }),
-  new algosdk.ABIMethod({ name: "player2turn", desc: "", args: [{ type: "string", name: "move", desc: "" }], returns: { type: "void", desc: "" } }),
-
-];
 
 type GameControlsProps = {
   gameId: string
@@ -38,22 +29,8 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
   const [opponentName, setOpponentName] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [waitingForOpponent, setWaitingForOpponent] = useState(false)
-  const { activeAccount ,transactionSigner} = useWallet()
-  const { toast } = useToast()
-  const algodClient = new algosdk.Algodv2(
-    "", // No token needed for PureStake
-    "https://testnet-api.algonode.cloud",
-    "",
-  )
+  const { activeAccount } = useWallet()
 
-  if (!activeAccount) {
-    toast({
-      title: "Wallet not connected",
-      description: "Please connect your wallet to create a game.",
-      variant: "destructive",
-    })
-    return
-  }
   // Check if both players have deposited
   useEffect(() => {
     if (appState) {
@@ -111,37 +88,7 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
     try {
       const encryptedMoveName = await encrypt(choice)
       console.log("Encrypted move:", encryptedMoveName)
-      const suggestedParams = await algodClient.getTransactionParams().do()
 
-      const atc = new algosdk.AtomicTransactionComposer();
-      const boxKey = algosdk.coerceToBytes('player1Move');
-
-      atc.addMethodCall({
-        appID: Number(gameId),
-        method: METHODS[0], // your ABI method (buyNFT)
-        signer: transactionSigner,
-        methodArgs: [], 
-        sender: activeAccount.address,
-        suggestedParams: { ...suggestedParams, fee: Number(30) },
-      });
-
-      atc.addMethodCall({
-        appID: Number(gameId),
-        method: METHODS[1], // your ABI method (buyNFT)
-        signer: transactionSigner,
-        methodArgs: [encryptedMoveName], 
-        sender: activeAccount.address,
-        suggestedParams: { ...suggestedParams, fee: Number(30) },
-        boxes:[{
-          appIndex: Number(gameId),
-          name: boxKey,
-        },]
-      });
-
-      const result = await atc.execute(algodClient, 4);
-      for (const mr of result.methodResults) {
-        console.log(`${mr.returnValue}`);
-      }
       // For demonstration, decrypt it back
       const decryptedMove = await decrypt(encryptedMoveName)
       console.log("Decrypted move:", decryptedMove)
@@ -155,6 +102,34 @@ export function GameControls({ gameId, isPlayer1, setGameState, appState }: Game
     setHasSubmitted(true)
     setIsSubmitting(false)
   }
+
+  // Add a new effect to periodically check for game updates
+  useEffect(() => {
+    // Skip if we're still waiting for opponent to deposit
+    if (waitingForOpponent) return
+
+    // Function to fetch the latest game state
+    const fetchGameState = async () => {
+      try {
+        // Use the existing makeChoice function with null to just get the current state
+        // without actually making a choice
+        const currentGameState = await makeChoice(gameId, isPlayer1, null)
+
+        // Only update the game state if both players have made choices
+        if (currentGameState.player1Choice && currentGameState.player2Choice) {
+          setGameState(currentGameState)
+        }
+      } catch (error) {
+        console.error("Error fetching game state:", error)
+      }
+    }
+
+    // Set up polling interval (every 2 seconds)
+    const intervalId = setInterval(fetchGameState, 2000)
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId)
+  }, [gameId, isPlayer1, setGameState, waitingForOpponent])
 
   const choices: { value: Choice; image: string; label: string }[] = [
     { value: "rock", image: "/rock.png", label: "Rock" },

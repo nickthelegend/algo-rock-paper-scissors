@@ -134,6 +134,27 @@ export function GameRoom({ gameId }: { gameId: string }) {
     setNeedsDeposit(false)
   }
 
+  // Function to handle game state updates
+  const handleGameStateUpdate = (updatedGameState: GameState) => {
+    setGameState(updatedGameState)
+
+    // If we have a result, show a toast notification
+    if (updatedGameState.result && !gameState?.result) {
+      const resultMessage =
+        updatedGameState.result === "draw"
+          ? "It's a draw!"
+          : (isPlayer1 && updatedGameState.result === "player1") ||
+              (!isPlayer1 && updatedGameState.result === "player2")
+            ? "You won!"
+            : "You lost!"
+
+      toast({
+        title: "Game Result",
+        description: resultMessage,
+      })
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
@@ -227,7 +248,12 @@ export function GameRoom({ gameId }: { gameId: string }) {
                 exit={{ opacity: 0 }}
                 className="w-full"
               >
-                <GameControls gameId={gameId} isPlayer1={isPlayer1} setGameState={setGameState} appState={appState} />
+                <GameControls
+                  gameId={gameId}
+                  isPlayer1={isPlayer1}
+                  setGameState={handleGameStateUpdate}
+                  appState={appState}
+                />
               </motion.div>
             </AnimatePresence>
 
