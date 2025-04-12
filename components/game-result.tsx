@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { type Choice, type GameState, resetGame } from "@/lib/actions"
-import { RotateCcw, AlertCircle, Trophy, Lock, Unlock } from "lucide-react"
+import { RotateCcw, AlertCircle, Trophy, Lock, Unlock, User, Swords } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import algosdk from "algosdk"
@@ -384,6 +384,23 @@ export function GameResult({
     return `${address.slice(0, 6)}...${address.slice(-6)}`
   }
 
+  // Function to determine the winning move explanation
+  const getWinningMoveExplanation = () => {
+    if (result === "draw" || !decryptedPlayer1Choice || !decryptedPlayer2Choice) return null
+
+    const winnerChoice = result === "player1" ? decryptedPlayer1Choice : decryptedPlayer2Choice
+    const loserChoice = result === "player1" ? decryptedPlayer2Choice : decryptedPlayer1Choice
+
+    const explanations: Record<string, string> = {
+      "rock-scissors": "Rock crushes Scissors",
+      "paper-rock": "Paper covers Rock",
+      "scissors-paper": "Scissors cut Paper",
+    }
+
+    const key = `${winnerChoice}-${loserChoice}`
+    return explanations[key] || null
+  }
+
   if (isDecrypting) {
     return (
       <div className="w-full space-y-6 p-4 rounded-lg border">
@@ -415,9 +432,43 @@ export function GameResult({
           <Badge className={getResultColor()}>{getResultMessage()}</Badge>
         </div>
 
+        {/* Game Result Summary */}
+        <div className="bg-muted/30 p-4 rounded-lg">
+          <h3 className="text-lg font-semibold text-center mb-2">Game Result</h3>
+          <div className="flex items-center justify-center gap-2 mb-3">
+            {result === "draw" ? (
+              <Badge variant="outline" className="text-yellow-500 border-yellow-500">
+                Draw
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-green-500 border-green-500">
+                {result === "player1" ? "Player 1 Won" : "Player 2 Won"}
+              </Badge>
+            )}
+          </div>
+
+          {result !== "draw" && (
+            <div className="text-center text-sm mb-3">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Trophy className="h-4 w-4 text-yellow-500" />
+                <span className="font-medium">{result === "player1" ? "Player 1" : "Player 2"} is the winner!</span>
+              </div>
+              {getWinningMoveExplanation() && (
+                <div className="text-muted-foreground text-xs">{getWinningMoveExplanation()}</div>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col items-center space-y-2">
-            <div className="text-sm font-medium">{isPlayer1 ? "You" : "Player 1"}</div>
+          <div
+            className={`flex flex-col items-center space-y-2 p-3 rounded-lg ${result === "player1" ? "bg-green-500/10" : result === "player2" ? "bg-red-500/10" : ""}`}
+          >
+            <div className="text-sm font-medium flex items-center gap-1">
+              <User className="h-4 w-4" />
+              {isPlayer1 ? "You (Player 1)" : "Player 1"}
+              {result === "player1" && <Trophy className="h-4 w-4 text-yellow-500" />}
+            </div>
             <motion.div
               initial={{ rotateY: 180, opacity: 0 }}
               animate={{ rotateY: 0, opacity: 1 }}
@@ -429,10 +480,21 @@ export function GameResult({
               <span className="capitalize">{decryptedPlayer1Choice}</span>
               <Unlock className="h-3 w-3 text-green-500" />
             </div>
+            {player1Address && (
+              <div className="text-xs text-muted-foreground mt-1 break-all">
+                Address: {truncateAddress(player1Address)}
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col items-center space-y-2">
-            <div className="text-sm font-medium">{!isPlayer1 ? "You" : "Player 2"}</div>
+          <div
+            className={`flex flex-col items-center space-y-2 p-3 rounded-lg ${result === "player2" ? "bg-green-500/10" : result === "player1" ? "bg-red-500/10" : ""}`}
+          >
+            <div className="text-sm font-medium flex items-center gap-1">
+              <User className="h-4 w-4" />
+              {!isPlayer1 ? "You (Player 2)" : "Player 2"}
+              {result === "player2" && <Trophy className="h-4 w-4 text-yellow-500" />}
+            </div>
             <motion.div
               initial={{ rotateY: 180, opacity: 0 }}
               animate={{ rotateY: 0, opacity: 1 }}
@@ -444,16 +506,54 @@ export function GameResult({
               <span className="capitalize">{decryptedPlayer2Choice}</span>
               <Unlock className="h-3 w-3 text-green-500" />
             </div>
+            {player2Address && (
+              <div className="text-xs text-muted-foreground mt-1 break-all">
+                Address: {truncateAddress(player2Address)}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Battle visualization */}
+        {result !== "draw" && (
+          <div className="flex items-center justify-center gap-2 py-2">
+            <div className="relative w-10 h-10">
+              <Image
+                src={`/${result === "player1" ? decryptedPlayer1Choice : decryptedPlayer2Choice}.png`}
+                alt="Winner choice"
+                fill
+                className="object-contain"
+                sizes="40px"
+              />
+            </div>
+            <Swords className="h-5 w-5 text-primary" />
+            <div className="relative w-10 h-10 opacity-60">
+              <Image
+                src={`/${result === "player1" ? decryptedPlayer2Choice : decryptedPlayer1Choice}.png`}
+                alt="Loser choice"
+                fill
+                className="object-contain"
+                sizes="40px"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Winner information */}
         {result !== "draw" && winnerAddress && (
           <div className="bg-green-500/10 text-green-500 p-3 rounded-lg flex items-center gap-2">
             <Trophy className="h-4 w-4 flex-shrink-0" />
             <div className="text-sm">
-              <p>Winner: {result === "player1" ? "Player 1" : "Player 2"}</p>
-              <p className="text-xs mt-1">Address: {truncateAddress(winnerAddress)}</p>
+              <p>
+                <strong>{result === "player1" ? "Player 1" : "Player 2"} won the game!</strong>
+              </p>
+              <p className="text-xs mt-1">Winner Address: {truncateAddress(winnerAddress)}</p>
+              <p className="text-xs mt-1">
+                {result === "player1" ? "Player 1" : "Player 2"} chose{" "}
+                {result === "player1" ? decryptedPlayer1Choice : decryptedPlayer2Choice} and
+                {result === "player1" ? " Player 2" : " Player 1"} chose{" "}
+                {result === "player1" ? decryptedPlayer2Choice : decryptedPlayer1Choice}
+              </p>
             </div>
           </div>
         )}
@@ -462,7 +562,10 @@ export function GameResult({
           <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-lg flex items-center gap-2">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <div className="text-sm">
-              <p>The game ended in a draw!</p>
+              <p>
+                <strong>The game ended in a draw!</strong>
+              </p>
+              <p className="text-xs mt-1">Both players chose {decryptedPlayer1Choice}.</p>
               <p className="text-xs mt-1">Click "Play Again" to start a new round.</p>
             </div>
           </div>
@@ -479,7 +582,17 @@ export function GameResult({
         {isGameOver ? (
           <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-lg flex items-center gap-2 mb-4">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
-            <div className="text-sm">This game is completed. You cannot play again with this game ID.</div>
+            <div className="text-sm">
+              <p>
+                <strong>This game is completed.</strong>
+              </p>
+              <p className="text-xs mt-1">You cannot play again with this game ID.</p>
+              {result !== "draw" && (
+                <p className="text-xs mt-1">
+                  The prize of 10 ALGOS has been sent to {result === "player1" ? "Player 1" : "Player 2"}'s wallet.
+                </p>
+              )}
+            </div>
           </div>
         ) : null}
 

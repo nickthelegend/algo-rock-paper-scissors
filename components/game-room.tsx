@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { GameControls } from "@/components/game-controls"
 import { GameResult } from "@/components/game-result"
 import { type GameState, joinGame } from "@/lib/actions"
-import { Copy, Share2, Wallet, Loader2, AlertCircle } from "lucide-react"
+import { Copy, Share2, Wallet, Loader2, AlertCircle, Trophy } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 import { ConnectWallet } from "@/components/connect-wallet"
@@ -32,6 +32,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
   const [player2Address, setPlayer2Address] = useState<string | null>(null)
   const [isGameFinishedState, setIsGameFinishedState] = useState(false)
   const [gameResetKey, setGameResetKey] = useState(0) // Add a key to force re-render
+  const [gameDetails, setGameDetails] = useState<any>(null)
   const { toast } = useToast()
   const { activeAccount } = useWallet()
   const router = useRouter()
@@ -51,6 +52,7 @@ export function GameRoom({ gameId }: { gameId: string }) {
         // Fetch game info from Supabase
         const game = await getGameByAppId(Number(gameId))
         if (game) {
+          setGameDetails(game)
           setPlayer1Address(game.player1_address)
           if (game.player2_address) {
             setPlayer2Address(game.player2_address)
@@ -253,6 +255,12 @@ export function GameRoom({ gameId }: { gameId: string }) {
     })
   }
 
+  // Function to truncate addresses for display
+  const truncateAddress = (address: string) => {
+    if (!address) return ""
+    return `${address.slice(0, 6)}...${address.slice(-6)}`
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
@@ -301,6 +309,20 @@ export function GameRoom({ gameId }: { gameId: string }) {
                 <p className="text-sm mt-1">You need to create a new game to play again.</p>
               </div>
             </div>
+
+            {gameDetails && gameDetails.winner && (
+              <div className="bg-green-500/10 text-green-500 p-4 rounded-lg flex items-center gap-2">
+                <Trophy className="h-5 w-5 flex-shrink-0" />
+                <div>
+                  <p>
+                    <strong>{gameDetails.winner === "player1" ? "Player 1" : "Player 2"} won this game!</strong>
+                  </p>
+                  {gameDetails.winner_address && (
+                    <p className="text-sm mt-1">Winner address: {truncateAddress(gameDetails.winner_address)}</p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="relative w-24 h-24">
               <Image src="/rock.png" alt="Rock Paper Scissors" fill className="object-contain" sizes="96px" />
